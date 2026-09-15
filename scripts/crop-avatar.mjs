@@ -9,7 +9,8 @@
  * If the source photo is absent this exits cleanly and the hub falls back to
  * an initials monogram.
  */
-import { existsSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
+import { dirname } from 'node:path';
 import sharp from 'sharp';
 import { computeSquareCrop } from './crop.mjs';
 
@@ -35,6 +36,10 @@ if (!existsSync(SOURCE)) {
 // sideways is cropped in the orientation you actually see.
 const { data, info } = await sharp(SOURCE).rotate().toBuffer({ resolveWithObject: true });
 const region = computeSquareCrop(info.width, info.height, CROP);
+
+// src/assets/ holds only this gitignored file, so git never tracks the folder
+// and it does not exist in a fresh clone (e.g. on Vercel). Create it.
+mkdirSync(dirname(OUTPUT), { recursive: true });
 
 await sharp(data)
   .extract(region)
