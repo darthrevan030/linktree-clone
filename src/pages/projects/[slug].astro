@@ -21,15 +21,21 @@ const dates = p.end ? `${p.start} – ${p.end}` : p.start;
 
 <Base title={p.name} description={p.tagline}>
   <article class="mx-auto max-w-3xl px-6 pb-8">
-    <a href="/projects" class="no-print inline-flex min-h-11 items-center text-sm text-muted hover:text-text">← All projects</a>
+    <a
+      href="/projects"
+      class="no-print inline-flex min-h-11 items-center gap-1.5 font-mono text-xs tracking-widest text-muted uppercase hover:text-accent"
+      ><span aria-hidden="true">←</span> All projects</a
+    >
 
     <header class="mt-8 border-b border-line pb-8">
-      <p class="font-mono text-xs text-muted">
-        {dates}{p.context && ` · ${p.context}`}
+      <p class="font-mono text-xs tracking-wider text-muted">
+        <span class="text-accent">U{p.order + 1}</span> · {dates}{p.context && ` · ${p.context}`}
       </p>
-      <h1 class="mt-2 text-4xl font-semibold tracking-tight text-text">{p.name}</h1>
-      {p.award && <p class="mt-2 text-accent">{p.award}</p>}
-      <p class="mt-4 text-lg leading-relaxed text-muted">{p.tagline}</p>
+      <h1 class="mt-2 font-display text-5xl leading-none font-semibold tracking-wide text-text uppercase">
+        {p.name}
+      </h1>
+      {p.award && <p class="mt-3 text-accent">{p.award}</p>}
+      <p class="mt-4 text-lg leading-relaxed text-balance text-muted">{p.tagline}</p>
 
       {
         p.links.length > 0 && (
@@ -39,7 +45,7 @@ const dates = p.end ? `${p.start} – ${p.end}` : p.start;
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="rounded-lg border border-line bg-surface inline-flex min-h-11 items-center px-4 text-sm text-text hover:border-accent"
+                class="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-accent/45 bg-epoxy px-4 font-mono text-xs tracking-widest text-text uppercase hover:border-accent hover:text-accent"
                 {...toDataAttrs({
                   id: `${project.id}:${link.label.toLowerCase()}`,
                   label: link.label,
@@ -48,7 +54,7 @@ const dates = p.end ? `${p.start} – ${p.end}` : p.start;
                   surface,
                 })}
               >
-                {link.label} ↗
+                {link.label} <span aria-hidden="true">↗</span>
               </a>
             ))}
           </div>
@@ -57,17 +63,16 @@ const dates = p.end ? `${p.start} – ${p.end}` : p.start;
 
       {
         p.tech.length > 0 && (
-          <ul class="mt-6 flex flex-wrap gap-1.5" aria-label="Tech stack">
-            {p.tech.map((t) => (
-              <li class="rounded-md border border-line px-2 py-0.5 font-mono text-xs text-muted">{t}</li>
-            ))}
-          </ul>
+          <p class="mt-6 font-mono text-xs leading-relaxed text-muted">
+            <span class="sr-only">Tech stack: </span>
+            {p.tech.join(' · ')}
+          </p>
         )
       }
     </header>
 
     <div
-      class="prose-body mt-8 space-y-5 leading-relaxed text-muted [&_code]:font-mono [&_code]:text-sm [&_code]:text-text [&_h2]:mt-10 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-text [&_li]:ml-5 [&_li]:list-disc [&_strong]:text-text [&_ul]:space-y-2"
+      class="prose-body mt-8 max-w-[68ch] space-y-5 leading-relaxed text-muted [&_code]:font-mono [&_code]:text-sm [&_code]:text-text [&_h2]:mt-12 [&_h2]:font-display [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:tracking-wide [&_h2]:text-text [&_h2]:uppercase [&_li]:ml-5 [&_li]:list-disc [&_li]:marker:text-copper [&_strong]:text-text [&_ul]:space-y-2"
     >
       <Content />
     </div>

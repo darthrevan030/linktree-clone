@@ -14,6 +14,7 @@ with first-party analytics. Static Astro site on Vercel.
 | `npm run check`       | Type-check (`astro check`)                                 |
 | `npm run lint`        | ESLint across `.ts`, `.astro`, and scripts                 |
 | `npm run check:links` | Probe every outbound link — manual, not a CI gate          |
+| `npm run favicons`    | Regenerate .ico and home-screen icon from favicon.svg      |
 
 ## Where things live
 
@@ -27,6 +28,8 @@ with first-party analytics. Static Astro site on Vercel.
 | Resume PDF download               | `public/Samarth-Bhatia-Resume.pdf`     |
 | Avatar photo                      | `public/samarth-bhatia.jpg`            |
 | Social preview image              | `public/og.png`                        |
+| Tab icon (source of truth)        | `public/favicon.svg`                   |
+| What you do now (hub, contact)    | `profile.current` in `profile.ts`      |
 
 Each project is **one file read by two pages**. Change a link once and both
 `/resume` and `/projects` update. Set `showcase: true` to give a project its own
@@ -96,6 +99,77 @@ Environment Variables.
   Optional: without it the build still succeeds, but repo star counts go
   missing once the unauthenticated limit (60/hr, shared across Vercel runners)
   is hit.
+- `CARD_KEY`, `CONTACT_PHONE` — **private**, for the NFC card page below.
+
+## NFC card
+
+The card holds a plain URL — the one NFC record every phone opens natively
+(Android including GrapheneOS, iPhone, anything else with NFC). It points to a
+private copy of the hub whose **Save contact** includes your phone number. The
+public site never shows the number.
+
+This is an **unlisted link, not a password**: anyone who taps the card can
+forward the URL. Search engines are told not to index it, it never leaks its
+own URL to sites it links to, and the key is stripped from analytics.
+
+### Set up
+
+1. **Generate a key** (hex: no punctuation, so it's safe to paste into any
+   terminal command):
+
+   ```sh
+   node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"
+   ```
+
+2. **Add both variables in Vercel** → Settings → Environment Variables →
+   Production:
+   - `CARD_KEY` — the key from step 1
+   - `CONTACT_PHONE` — your number as it should appear in contacts
+
+   Redeploy. The build fails loudly if the key is too short or malformed, so
+   a typo can't silently publish a guessable URL.
+
+3. **Your card URL** is `https://samarthbhatia.com/c/<CARD_KEY>/` — keep the
+   trailing `/`, it's the exact generated path. Open it on your phone first and
+   confirm Save contact includes your number.
+
+4. **Write the card** with the free *NFC Tools* app (Android or iPhone):
+   Write → Add a record → URL/URI → paste the card URL → Write → hold the card
+   to the phone. **Don't lock or password-protect the tag** — leaving it
+   rewritable is what lets you rotate the key later. NTAG213 or larger fits the
+   URL comfortably.
+
+5. **Print a QR code of the same URL on the back** for phones without NFC or
+   with NFC switched off.
+
+### Test on real phones
+
+Tap the card with an Android phone and an iPhone. Each should open the page,
+and **Save contact** should offer to add the contact (iPhone may show a
+download prompt first). Emulators can't test this — it needs real devices.
+
+### If the link leaks
+
+Generate a new key, replace `CARD_KEY` in Vercel, redeploy (the old URL now
+404s), and rewrite the card.
+
+### Preview locally
+
+Add `CARD_KEY` and `CONTACT_PHONE` to `.env`, restart `npm run dev`, and open
+`http://localhost:4321/c/<CARD_KEY>/`.
+
+## After each deploy
+
+Vercel applies `vercel.json` only on its servers, so check the live headers:
+
+```sh
+curl -sI https://samarthbhatia.com/samarth-bhatia.vcf | grep -i "content-"
+curl -sI "https://samarthbhatia.com/c/<CARD_KEY>/" | grep -iE "x-robots|referrer"
+```
+
+Expect `content-type: text/vcard` and `content-disposition: attachment` on the
+first, and `x-robots-tag: noindex` plus `referrer-policy: no-referrer` on the
+second.
 
 ## Known issue: Windows local builds
 

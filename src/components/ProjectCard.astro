@@ -63,7 +63,10 @@ const stat = statsLabel(stats);
     )
   }
 
-  <footer class="mt-auto flex flex-wrap items-center gap-x-5 border-t border-line/60 pt-1 font-mono text-xs tracking-widest uppercase">
+  {/* Guarantees a gap above the footer rule and absorbs extra height when a grid row stretches the card. */}
+  <div class="min-h-5 flex-1" aria-hidden="true"></div>
+
+  <footer class="flex flex-wrap items-center gap-x-5 border-t border-line/60 pt-1 font-mono text-xs tracking-widest uppercase">
     {
       p.links.map((link) => (
         <a
