@@ -35,8 +35,11 @@ write-up page, built from the Markdown body.
 Missing assets degrade cleanly: no avatar photo shows an initials monogram, and
 no resume PDF hides the download button. Drop the file in and it appears.
 
-The avatar is imported (not linked) so Astro emits small WebP copies at build
-time — keep the full-size original in `public/`; there is no need to resize it.
+Keep the full-size original photo in `public/` — no need to resize it. Before
+each build, `scripts/crop-avatar.mjs` cuts a face-centred headshot from it into
+`src/assets/avatar.generated.jpg` (gitignored), which Astro turns into small WebP
+copies. **If you replace the photo, adjust `CROP` in that script** so it is
+centred on your face.
 
 ## Resume update runbook
 
