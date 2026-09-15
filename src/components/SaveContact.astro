@@ -1,0 +1,63 @@
+---
+/**
+ * Connector J1: "Save contact", plus a call link on the private card page.
+ *
+ * Deliberately has no `download` attribute: how the .vcf is handled is decided
+ * by the response headers (vercel.json / lib/contact.ts) in one place, so it can
+ * be tuned after real-device testing without touching markup.
+ */
+import { CONTACT_SAVE_EVENT, LINK_CLICK_EVENT } from '../lib/analytics';
+
+interface Props {
+  contactHref: string;
+  /** Private card page only. */
+  phone?: string;
+  class?: string;
+}
+
+const { contactHref, phone, class: className } = Astro.props;
+const surface = Astro.url.pathname;
+const telHref = phone ? `tel:${phone.replace(/[^\d+]/g, '')}` : undefined;
+---
+
+<section class:list={['mx-auto max-w-md', className]} aria-labelledby="contact-heading">
+  <h2 id="contact-heading" class="sr-only">Contact</h2>
+  <a
+    href={contactHref}
+    class="group flex min-h-16 items-center gap-4 rounded-lg border border-accent/45 bg-epoxy px-5 py-4 transition-colors hover:border-accent"
+    data-ph-event={CONTACT_SAVE_EVENT}
+    data-ph-label={phone ? 'contact-card' : 'contact-public'}
+    data-ph-dest={contactHref}
+    data-ph-kind="hub"
+    data-ph-surface={surface}
+  >
+    <span class="font-mono text-[0.65rem] tracking-widest text-muted" aria-hidden="true">J1</span>
+    <span class="flex flex-1 flex-col">
+      <span
+        class="font-display text-xl font-semibold tracking-wide text-text uppercase group-hover:text-accent"
+      >
+        Save contact
+      </span>
+      <span class="text-sm text-muted">
+        {phone ? 'Adds my number and links to your contacts' : 'Adds my email and links to your contacts'}
+      </span>
+    </span>
+    <span class="text-xl text-accent" aria-hidden="true">↓</span>
+  </a>
+
+  {
+    phone && telHref && (
+      <a
+        href={telHref}
+        class="mt-3 flex min-h-12 items-center justify-center gap-2 rounded-lg border border-line font-mono text-sm tracking-wider text-text hover:border-accent hover:text-accent"
+        data-ph-event={LINK_CLICK_EVENT}
+        data-ph-label="call"
+        data-ph-dest="tel"
+        data-ph-kind="hub"
+        data-ph-surface={surface}
+      >
+        <span class="text-muted">Call</span> {phone}
+      </a>
+    )
+  }
+</section>

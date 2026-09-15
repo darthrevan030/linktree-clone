@@ -36,26 +36,31 @@ const linkAttrs =
         ...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {}),
         ...toDataAttrs({ id, label, url, kind: 'hub', surface }),
       }
-    : { 'aria-hidden': 'true' };
+    : { 'aria-hidden': 'true' as const };
 ---
 
 <li
-  class:list={['pin', side === 'left' ? 'pin-left md:col-start-1' : 'pin-right md:col-start-3']}
+  class:list={[
+    'pin',
+    side === 'left' ? 'pin-left lg:col-start-1' : 'pin-right lg:col-start-3',
+    // The unconnected pin only exists to keep the package symmetric on desktop.
+    nc && 'hidden lg:block',
+  ]}
   style={`--pin: ${pin}; grid-row: ${row};`}
 >
   <Tag
     {...linkAttrs}
     class:list={[
-      'group flex min-h-16 items-center gap-0 md:min-h-22',
-      side === 'left' && 'md:flex-row-reverse',
+      'group flex min-h-16 items-center gap-0 py-2.5 lg:min-h-22 lg:py-0',
+      side === 'left' && 'lg:flex-row-reverse',
       nc ? 'cursor-default opacity-45' : 'rounded-md',
     ]}
   >
-    <span class="leg hidden h-2.5 w-4 flex-none rounded-[1px] bg-tin md:block" aria-hidden="true"
+    <span class="leg hidden h-2.5 w-4 flex-none rounded-[1px] bg-tin lg:block" aria-hidden="true"
     ></span>
     <span
       class:list={[
-        'trace h-0.5 w-5 flex-none md:w-auto md:flex-1',
+        'trace h-0.5 w-5 flex-none lg:w-auto lg:flex-1',
         nc ? 'bg-line' : 'bg-copper group-hover:bg-accent group-focus-visible:bg-accent',
       ]}
       aria-hidden="true"></span>
@@ -73,8 +78,8 @@ const linkAttrs =
 
     <span
       class:list={[
-        'flex min-w-0 flex-1 flex-col px-3.5 md:flex-none',
-        side === 'left' && 'md:items-end md:text-right',
+        'flex min-w-0 flex-1 flex-col px-3.5 lg:w-64 lg:flex-none',
+        side === 'left' && 'lg:items-end lg:text-right',
       ]}
     >
       <span class="font-mono text-[0.65rem] tracking-[0.2em] text-muted uppercase">
@@ -131,7 +136,7 @@ const linkAttrs =
     animation-delay: calc(var(--pin) * 80ms + 520ms);
   }
 
-  @media (min-width: 48rem) {
+  @media (min-width: 64rem) {
     /* Left-side traces grow outward from the chip, which is to their right. */
     .pin-left .trace {
       transform-origin: right center;

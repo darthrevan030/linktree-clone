@@ -69,10 +69,22 @@ Tracked events:
 
 - `link_click` — every tracked link, with `label`, `destination`, `kind`, `surface`
 - `resume_download` — the PDF button
+- `contact_save` — the Save contact button
 - `$pageview` / `$pageleave` — automatic
 
-The proxy is a **Vercel rewrite** and does not exist under `astro dev` or
-`astro preview`. Verify analytics on a deployment, not locally.
+On Vercel the proxy is a rewrite in `vercel.json`. Locally, `astro.config.mjs`
+mirrors the same rules in the dev server, so `npm run dev` sends real events —
+tagged `environment: development` so you can filter them out in PostHog. Keep the
+two sets of rules in sync. (`astro preview` has no proxy.)
+
+**No events from automated browsers.** PostHog silently drops events from
+browsers that identify as bots — including DevTools/Playwright-driven Chrome
+(`navigator.webdriver` is true). If a test harness sees analytics load but
+never send, that is why; real visitors are unaffected.
+
+`contact_save` fires when someone taps **Save contact**. On the private card
+page every event also carries `source: nfc-card`, and the card key is stripped
+from all event properties before sending.
 
 ## Environment
 
