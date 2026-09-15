@@ -5,7 +5,21 @@ export type Social = {
   handle: string;
 };
 
-/** Icon row — compact identity links shown on every page footer and the hub. */
+/**
+ * Social profiles. Shown as test points on the hub, in the footer of every
+ * page, on /resume, and included in "Save contact".
+ *
+ * To add one, copy an entry. Keep `id` lowercase and stable (it is the
+ * analytics label). Run `npm run check:links` afterwards to confirm the URL
+ * resolves. For example:
+ *
+ *   {
+ *     id: 'instagram',
+ *     label: 'Instagram',
+ *     url: 'https://www.instagram.com/your-handle/',
+ *     handle: 'your-handle',
+ *   },
+ */
 export const socials: Social[] = [
   {
     id: 'github',

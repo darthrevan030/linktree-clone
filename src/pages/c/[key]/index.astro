@@ -1,0 +1,24 @@
+---
+/**
+ * Private NFC card page. Identical to the hub, except "Save contact" includes
+ * the phone number and the number is shown as a call link.
+ *
+ * Only built when CARD_KEY and CONTACT_PHONE are both set — see src/lib/card.ts.
+ */
+import type { GetStaticPaths } from 'astro';
+import Base from '../../../layouts/Base.astro';
+import Hub from '../../../components/Hub.astro';
+import { buildEnv, readCardConfig } from '../../../lib/card';
+
+export const getStaticPaths = (() => {
+  const card = readCardConfig(buildEnv());
+  return card ? [{ params: { key: card.key }, props: { phone: card.phone } }] : [];
+}) satisfies GetStaticPaths;
+
+const { key } = Astro.params;
+const { phone } = Astro.props;
+---
+
+<Base bare privateCard>
+  <Hub contactHref={`/c/${key}/samarth-bhatia.vcf`} phone={phone} />
+</Base>

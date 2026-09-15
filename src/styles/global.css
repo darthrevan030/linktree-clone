@@ -1,20 +1,29 @@
 @import "tailwindcss";
 
 /*
- * Baseline tokens only. The deliberate visual identity comes in the design
- * pass (build step 7) — these exist so every page is legible and consistent
- * until then, and so that pass has one place to change.
+ * Visual system: a printed circuit board.
+ *
+ * Contrast-checked against WCAG AA before use:
+ *   silkscreen on board 10.85 · muted on board 6.30 · pad gold on board 6.30
+ *   copper on board 4.24 — below 4.5, so COPPER IS NEVER USED FOR TEXT.
+ *   It is for traces and graphics only (passes the 3:1 non-text threshold).
+ *   Any accent text uses pad gold (`accent`).
  */
 @theme {
-  --color-ink: #0b0c0e;
-  --color-surface: #141519;
-  --color-line: #26282e;
-  --color-muted: #8b8f98;
-  --color-text: #e8e9ec;
-  --color-accent: #7cc4ff;
+  --color-ink: #0a3026; /* page backdrop, behind the board */
+  --color-surface: #0e3b2e; /* solder-mask board green */
+  --color-line: #2f6352; /* silkscreen outlines */
+  --color-muted: #a9bdb2; /* dim silkscreen text */
+  --color-text: #eef0e8; /* silkscreen text */
+  --color-accent: #d9b36a; /* gold pads — accent TEXT allowed */
+  --color-copper: #c8894a; /* traces and graphics ONLY, never text */
+  --color-epoxy: #16181b; /* chip package */
+  --color-etch: #8e9399; /* laser-etched marking on the chip */
+  --color-tin: #c9cdd2; /* chip pin legs */
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Consolas, monospace;
 }
 
 html {
@@ -22,13 +31,19 @@ html {
   color: var(--color-text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* Visible, consistent keyboard focus everywhere. */
+::selection {
+  background: var(--color-accent);
+  color: var(--color-epoxy);
+}
+
+/* Visible, consistent keyboard focus everywhere — a gold pad ring. */
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;
-  border-radius: 6px;
+  border-radius: 4px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -36,6 +51,8 @@ html {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    /* Delays too: otherwise staggered entrances still hold content back. */
+    animation-delay: 0ms !important;
     transition-duration: 0.01ms !important;
   }
 }

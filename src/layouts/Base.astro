@@ -1,4 +1,11 @@
 ---
+import '@fontsource/ibm-plex-sans-condensed/500.css';
+import '@fontsource/ibm-plex-sans-condensed/600.css';
+import '@fontsource/ibm-plex-sans/400.css';
+import '@fontsource/ibm-plex-sans/500.css';
+import '@fontsource/ibm-plex-sans/600.css';
+import '@fontsource/jetbrains-mono/400.css';
+import '@fontsource/jetbrains-mono/500.css';
 import '../styles/global.css';
 import Analytics from '../components/Analytics.astro';
 import { profile } from '../data/profile';
@@ -10,29 +17,42 @@ interface Props {
   description?: string;
   /** Hide the site nav — the hub page is its own navigation. */
   bare?: boolean;
+  /**
+   * Private NFC card page: keep it out of search engines, never send its URL
+   * (which contains the key) to other sites, and point canonical at the
+   * public hub so the key appears nowhere a crawler would follow.
+   */
+  privateCard?: boolean;
 }
 
-const {
-  title,
-  description = profile.bio,
-  bare = false,
-} = Astro.props;
+const { title, description = profile.bio, bare = false, privateCard = false } = Astro.props;
 
 const pageTitle = title ? `${title} — ${profile.name}` : profile.name;
-const canonical = new URL(Astro.url.pathname, profile.siteUrl).href;
+const canonical = privateCard
+  ? profile.siteUrl + '/'
+  : new URL(Astro.url.pathname, profile.siteUrl).href;
 const ogImage = new URL(profile.ogImage, profile.siteUrl).href;
 const surface = Astro.url.pathname;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-source={privateCard ? 'nfc-card' : undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0a3026" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {
+      privateCard && (
+        <>
+          <meta name="robots" content="noindex, nofollow, noarchive" />
+          <meta name="referrer" content="no-referrer" />
+        </>
+      )
+    }
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content={pageTitle} />
@@ -46,13 +66,18 @@ const surface = Astro.url.pathname;
   <body class="min-h-screen">
     {
       !bare && (
-        <header class="no-print mx-auto flex max-w-3xl items-center justify-between px-6 py-6">
-          <a href="/" class="inline-flex min-h-11 items-center font-semibold tracking-tight text-text hover:text-accent">
-            {profile.name}
+        <header class="no-print mx-auto flex max-w-3xl items-center justify-between gap-4 px-6 py-5">
+          <a href="/" class="group inline-flex min-h-11 items-center gap-3 text-text">
+            <span class="rounded-sm border border-line px-1.5 py-0.5 font-mono text-[0.65rem] tracking-widest text-muted group-hover:border-accent group-hover:text-accent">
+              U1
+            </span>
+            <span class="font-display text-lg font-semibold tracking-wide uppercase">
+              {profile.name}
+            </span>
           </a>
-          <nav class="flex gap-6 text-sm text-muted">
-            <a href="/projects" class="inline-flex min-h-11 items-center hover:text-text">Projects</a>
-            <a href="/resume" class="inline-flex min-h-11 items-center hover:text-text">Resume</a>
+          <nav class="flex gap-5 font-mono text-xs tracking-widest text-muted uppercase">
+            <a href="/projects" class="inline-flex min-h-11 items-center hover:text-accent">Projects</a>
+            <a href="/resume" class="inline-flex min-h-11 items-center hover:text-accent">Resume</a>
           </nav>
         </header>
       )
@@ -62,22 +87,24 @@ const surface = Astro.url.pathname;
       <slot />
     </main>
 
-    <footer class="no-print mx-auto max-w-3xl px-6 py-12 text-sm text-muted">
-      <div class="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-line pt-6">
+    <footer class="no-print mx-auto max-w-3xl px-6 pt-10 pb-12 font-mono text-xs tracking-widest text-muted uppercase">
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-line pt-5">
         {
           socials.map((s) => (
             <a
               href={s.url}
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex min-h-11 items-center hover:text-text"
+              class="inline-flex min-h-11 items-center hover:text-accent"
               {...toDataAttrs({ id: s.id, label: s.label, url: s.url, kind: 'social', surface })}
             >
               {s.label}
             </a>
           ))
         }
-        <span class="ml-auto">© {new Date().getFullYear()} {profile.name}</span>
+        <span class="ml-auto normal-case tracking-normal">
+          © {new Date().getFullYear()} {profile.name}
+        </span>
       </div>
     </footer>
   </body>

@@ -14,8 +14,11 @@
 
 <script>
   import type { PostHog } from 'posthog-js';
+  import { scrubCardPaths } from '../lib/analytics';
 
   const key = import.meta.env.PUBLIC_POSTHOG_KEY;
+  /** "nfc-card" on the private card page, so taps are attributable. */
+  const source = document.documentElement.dataset.source;
 
   type Pending = { event: string; props: Record<string, string> };
 
@@ -38,7 +41,14 @@
       disable_session_recording: true,
       capture_pageview: true,
       capture_pageleave: true,
+      // The card URL contains the private key; strip it from every event so
+      // the key is never stored in PostHog.
+      before_send: (event) => {
+        if (event?.properties) event.properties = scrubCardPaths(event.properties);
+        return event;
+      },
     });
+    if (source) posthog.register({ source });
     client = posthog;
     // Flush anything clicked while the library was still loading.
     for (const { event, props } of queue.splice(0)) client.capture(event, props);

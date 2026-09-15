@@ -34,6 +34,28 @@ export const LINK_CLICK_EVENT = 'link_click';
 /** Event name fired when the resume PDF is downloaded. */
 export const RESUME_DOWNLOAD_EVENT = 'resume_download';
 
+/** Event name fired when someone taps "Save contact". */
+export const CONTACT_SAVE_EVENT = 'contact_save';
+
+/** Matches the private NFC card path segment: /c/<key> */
+const CARD_PATH = /\/c\/[A-Za-z0-9_-]+/g;
+
+/**
+ * Replace the private card key in every string property before an event
+ * leaves the browser, so the key is never stored in PostHog.
+ *
+ * Scrubs all string values rather than a list of known keys: PostHog records
+ * the URL in several properties ($current_url, $pathname, ...), and missing
+ * one would leak the key.
+ */
+export function scrubCardPaths<T extends Record<string, unknown>>(properties: T): T {
+  const out: Record<string, unknown> = {};
+  for (const [name, value] of Object.entries(properties)) {
+    out[name] = typeof value === 'string' ? value.replace(CARD_PATH, '/c/card') : value;
+  }
+  return out as T;
+}
+
 /**
  * True when the href leaves this site. Protocol-relative and absolute URLs
  * count as outbound; root-relative paths and fragments do not.

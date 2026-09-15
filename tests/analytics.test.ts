@@ -4,6 +4,7 @@ import {
   toLinkEvent,
   toDataAttrs,
   LINK_CLICK_EVENT,
+  scrubCardPaths,
   type TrackedLink,
 } from '../src/lib/analytics';
 
@@ -92,5 +93,40 @@ describe('toDataAttrs', () => {
       expect(typeof value).toBe('string');
       expect(value.length).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('scrubCardPaths', () => {
+  const KEY = 'k8Tq2xVn7LpR4mWz9cYb';
+
+  it('replaces the card key in every string property, wherever it appears', () => {
+    const scrubbed = scrubCardPaths({
+      $current_url: `https://samarthbhatia.com/c/${KEY}/?utm=x`,
+      $pathname: `/c/${KEY}/`,
+      destination: `/c/${KEY}/samarth-bhatia.vcf`,
+    });
+    // Expected values written out independently.
+    expect(scrubbed).toEqual({
+      $current_url: 'https://samarthbhatia.com/c/card/?utm=x',
+      $pathname: '/c/card/',
+      destination: '/c/card/samarth-bhatia.vcf',
+    });
+    expect(JSON.stringify(scrubbed)).not.toContain(KEY);
+  });
+
+  it('leaves non-card URLs and non-string values untouched', () => {
+    const props = {
+      $current_url: 'https://samarthbhatia.com/projects/cloud-janitor/',
+      $pathname: '/resume/',
+      clicks: 3,
+      flag: true,
+      nothing: null,
+    };
+    expect(scrubCardPaths(props)).toEqual(props);
+  });
+
+  it('does not treat unrelated paths that merely contain "c" as card paths', () => {
+    expect(scrubCardPaths({ u: '/projects/cloud-janitor/' }).u).toBe('/projects/cloud-janitor/');
+    expect(scrubCardPaths({ u: 'https://example.com/abc/def' }).u).toBe('https://example.com/abc/def');
   });
 });

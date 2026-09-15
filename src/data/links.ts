@@ -3,41 +3,36 @@ export type HubLink = {
   label: string;
   description: string;
   url: string;
-  featured?: boolean;
 };
 
 /**
- * The hub page's main buttons, in display order.
+ * The hub's main links, drawn as the pins of chip U1. Order = pin number
+ * (pin 1 is top-left, counting counter-clockwise like a real DIP chip).
+ *
+ * Social profiles are NOT listed here — they live in socials.ts and appear as
+ * test points, so no link shows up twice.
  *
  * `id` doubles as the PostHog event label, so keep ids stable — renaming one
  * splits its click history into two series.
  */
 export const links: HubLink[] = [
   {
+    id: 'money-pasar',
+    label: 'Money Pasar',
+    description: 'Product Lead · cross-border payments',
+    url: 'https://moneypasar.com/',
+  },
+  {
     id: 'projects',
     label: 'Projects',
     description: 'Nine things I built, and why',
     url: '/projects',
-    featured: true,
   },
   {
     id: 'resume',
     label: 'Resume',
     description: 'Experience, education, skills',
     url: '/resume',
-    featured: true,
-  },
-  {
-    id: 'github',
-    label: 'GitHub',
-    description: '@darthrevan030',
-    url: 'https://github.com/darthrevan030',
-  },
-  {
-    id: 'linkedin',
-    label: 'LinkedIn',
-    description: 'Connect with me',
-    url: 'https://www.linkedin.com/in/samarth-bhatia-03-/',
   },
   {
     id: 'vantage',

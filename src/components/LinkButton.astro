@@ -1,39 +1,140 @@
 ---
-import { toDataAttrs, isOutbound, type TrackableKind } from '../lib/analytics';
+/**
+ * One pin of chip U1 on the hub.
+ *
+ * Mobile (primary — NFC taps land here): pins hang off a vertical copper bus.
+ * Desktop: pins sit either side of the chip, numbered counter-clockwise from
+ * pin 1 (top-left) exactly like a real DIP package, so the number is true
+ * information, not decoration.
+ *
+ * DOM order is always leg → trace → pad → label; CSS mirrors the left side on
+ * desktop so the leg touches the chip. One semantic link per pin, in order.
+ */
+import { toDataAttrs, isOutbound } from '../lib/analytics';
 
 interface Props {
-  id: string;
-  label: string;
+  pin: number;
+  side: 'left' | 'right';
+  /** Desktop grid row this pin occupies. */
+  row: number;
+  id?: string;
+  label?: string;
   description?: string;
-  url: string;
-  kind?: TrackableKind;
-  featured?: boolean;
+  url?: string;
+  /** "No connect": a real unused pin that pads the package to an even count. */
+  nc?: boolean;
 }
 
-const { id, label, description, url, kind = 'hub', featured = false } = Astro.props;
-const external = isOutbound(url);
+const { pin, side, row, id, label, description, url, nc = false } = Astro.props;
+const external = url ? isOutbound(url) : false;
 const surface = Astro.url.pathname;
+const Tag = nc ? 'div' : 'a';
+const linkAttrs =
+  !nc && url && id && label
+    ? {
+        href: url,
+        ...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {}),
+        ...toDataAttrs({ id, label, url, kind: 'hub', surface }),
+      }
+    : { 'aria-hidden': 'true' };
 ---
 
-<a
-  href={url}
-  {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-  {...toDataAttrs({ id, label, url, kind, surface })}
-  class:list={[
-    'group flex min-h-14 items-center justify-between gap-4 rounded-xl border px-5 py-4 transition-colors',
-    featured
-      ? 'border-accent/40 bg-accent/10 hover:border-accent hover:bg-accent/15'
-      : 'border-line bg-surface hover:border-muted',
-  ]}
+<li
+  class:list={['pin', side === 'left' ? 'pin-left md:col-start-1' : 'pin-right md:col-start-3']}
+  style={`--pin: ${pin}; grid-row: ${row};`}
 >
-  <span class="flex flex-col">
-    <span class="font-medium text-text">{label}</span>
-    {description && <span class="text-sm text-muted">{description}</span>}
-  </span>
-  <span
-    class="text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-text"
-    aria-hidden="true"
+  <Tag
+    {...linkAttrs}
+    class:list={[
+      'group flex min-h-16 items-center gap-0 md:min-h-22',
+      side === 'left' && 'md:flex-row-reverse',
+      nc ? 'cursor-default opacity-45' : 'rounded-md',
+    ]}
   >
-    {external ? '↗' : '→'}
-  </span>
-</a>
+    <span class="leg hidden h-2.5 w-4 flex-none rounded-[1px] bg-tin md:block" aria-hidden="true"
+    ></span>
+    <span
+      class:list={[
+        'trace h-0.5 w-5 flex-none md:w-auto md:flex-1',
+        nc ? 'bg-line' : 'bg-copper group-hover:bg-accent group-focus-visible:bg-accent',
+      ]}
+      aria-hidden="true"></span>
+    <span
+      class:list={[
+        'pad relative flex size-4 flex-none items-center justify-center rounded-full transition-shadow',
+        nc
+          ? 'border-2 border-line'
+          : 'bg-accent group-hover:shadow-[0_0_0_6px_rgb(217_179_106/0.18)] group-focus-visible:shadow-[0_0_0_6px_rgb(217_179_106/0.18)]',
+      ]}
+      aria-hidden="true"
+    >
+      {!nc && <span class="size-1.5 rounded-full bg-surface"></span>}
+    </span>
+
+    <span
+      class:list={[
+        'flex min-w-0 flex-1 flex-col px-3.5 md:flex-none',
+        side === 'left' && 'md:items-end md:text-right',
+      ]}
+    >
+      <span class="font-mono text-[0.65rem] tracking-[0.2em] text-muted uppercase">
+        Pin {pin}{nc && ' · NC'}
+      </span>
+      {
+        !nc && (
+          <>
+            <span class="font-display text-xl leading-tight font-semibold tracking-wide text-text uppercase group-hover:text-accent group-focus-visible:text-accent">
+              {label}
+              <span class="ml-1 inline-block text-base font-medium text-muted" aria-hidden="true">
+                {external ? '↗' : '→'}
+              </span>
+            </span>
+            {description && <span class="text-sm text-muted">{description}</span>}
+          </>
+        )
+      }
+    </span>
+  </Tag>
+</li>
+
+<style>
+  @keyframes trace-draw {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes pad-in {
+    from {
+      opacity: 0;
+      transform: scale(0.4);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* The one orchestrated moment: traces draw out to their pads in pin order. */
+  .trace {
+    transform-origin: left center;
+    animation: trace-draw 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--pin) * 80ms + 150ms);
+    transition: background-color 0.15s;
+  }
+
+  .pad {
+    animation: pad-in 0.3s ease-out both;
+    animation-delay: calc(var(--pin) * 80ms + 520ms);
+  }
+
+  @media (min-width: 48rem) {
+    /* Left-side traces grow outward from the chip, which is to their right. */
+    .pin-left .trace {
+      transform-origin: right center;
+    }
+  }
+</style>
