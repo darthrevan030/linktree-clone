@@ -19,7 +19,7 @@ export const links: HubLink[] = [
   {
     id: 'money-pasar',
     label: 'Money Pasar',
-    description: 'Product Lead · cross-border payments',
+    description: 'Cross-border payments for SMEs',
     url: 'https://moneypasar.com/',
   },
   {

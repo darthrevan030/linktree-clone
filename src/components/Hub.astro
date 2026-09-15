@@ -104,14 +104,14 @@ const dateCode = `${String(thursday.getUTCFullYear()).slice(2)}${String(week).pa
       <p class="mt-1 text-lg text-text">
         {profile.current.role} at <span class="font-semibold text-accent">{profile.current.org}</span>
       </p>
-      <p class="mt-0.5 max-w-sm text-sm text-muted">{profile.current.summary}</p>
+      <p class="mt-0.5 max-w-sm text-sm text-balance text-muted">{profile.current.summary}</p>
     </header>
 
     {/* Card taps most likely want the contact, so on the card page it comes first. */}
     {phone && <SaveContact contactHref={contactHref} phone={phone} class="mt-8" />}
 
     <div
-      class="pinout mt-9 flex flex-col lg:mt-12 lg:grid lg:grid-cols-[1fr_minmax(15rem,17rem)_1fr]"
+      class="pinout mt-9 flex flex-col lg:mt-12 lg:grid lg:grid-cols-[1fr_15rem_1fr] xl:grid-cols-[1fr_17rem_1fr]"
       style={`grid-template-rows: repeat(${half}, auto);`}
     >
       <div
@@ -192,6 +192,6 @@ const dateCode = `${String(thursday.getUTCFullYear()).slice(2)}${String(week).pa
       </ul>
     </section>
 
-    <p class="mx-auto mt-8 max-w-xl text-center text-sm leading-relaxed text-muted">{profile.bio}</p>
+    <p class="mx-auto mt-8 max-w-xl text-center text-sm leading-relaxed text-balance text-muted">{profile.bio}</p>
   </div>
 </div>
