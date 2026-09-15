@@ -22,3 +22,11 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Claude Code session history — never publish
+.remember/
+.dist/
+
+# env
+.env*
+!.env.example
