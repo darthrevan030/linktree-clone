@@ -41,6 +41,11 @@
       disable_session_recording: true,
       capture_pageview: true,
       capture_pageleave: true,
+      // Local testing sends real events (via the dev proxy in astro.config.mjs).
+      // Tag them so they can be filtered out of real traffic in PostHog.
+      loaded: (ph) => {
+        if (import.meta.env.DEV) ph.register({ environment: 'development' });
+      },
       // The card URL contains the private key; strip it from every event so
       // the key is never stored in PostHog.
       before_send: (event) => {
@@ -49,9 +54,6 @@
       },
     });
     if (source) posthog.register({ source });
-    // Local testing sends real events (via the dev proxy in astro.config.mjs).
-    // Tag them so they can be filtered out of real traffic in PostHog.
-    if (import.meta.env.DEV) posthog.register({ environment: 'development' });
     client = posthog;
     // Flush anything clicked while the library was still loading.
     for (const { event, props } of queue.splice(0)) client.capture(event, props);
