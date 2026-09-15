@@ -30,3 +30,6 @@ pnpm-debug.log*
 # env
 .env*
 !.env.example
+
+# generated from public/samarth-bhatia.jpg by scripts/crop-avatar.mjs
+src/assets/avatar.generated.jpg
