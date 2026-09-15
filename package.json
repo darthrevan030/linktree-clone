@@ -1,5 +1,5 @@
 {
-  "name": "bustling-asteroid",
+  "name": "samarthbhatia-com",
   "type": "module",
   "version": "0.0.1",
   "engines": {
@@ -9,12 +9,24 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "astro build && vitest run",
+    "test:watch": "vitest",
+    "check": "astro check"
   },
   "dependencies": {
-    "astro": "^7.3.2"
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.3.2",
+    "posthog-js": "^1.433.4",
+    "tailwindcss": "^4.3.3"
   },
   "allowScripts": {
     "esbuild": true
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/node": "^26.5.1",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.1"
   }
 }
