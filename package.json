@@ -3,30 +3,41 @@
   "type": "module",
   "version": "0.0.1",
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.19.0"
   },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "test": "astro build && vitest run",
+    "test": "npm run build && vitest run",
     "test:watch": "vitest",
-    "check": "astro check"
+    "check": "astro check",
+    "check:links": "node scripts/check-links.mjs",
+    "lint": "eslint .",
+    "prebuild": "node scripts/crop-avatar.mjs",
+    "predev": "node scripts/crop-avatar.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.3.2",
     "posthog-js": "^1.433.4",
-    "tailwindcss": "^4.3.3"
+    "sharp": "^0.35.4",
+    "tailwindcss": "^4.3.3",
+    "undici": "^8.10.2"
   },
   "allowScripts": {
     "esbuild": true
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@eslint/js": "^10.0.1",
     "@types/node": "^26.5.1",
+    "eslint": "^10.10.0",
+    "eslint-plugin-astro": "^1.7.0",
+    "globals": "^17.12.0",
     "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.0",
     "vitest": "^5.0.1"
   }
 }
