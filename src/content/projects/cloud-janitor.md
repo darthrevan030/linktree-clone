@@ -43,7 +43,9 @@ one, as reviewable Terraform HCL a human reads and approves.
 ## The eleven agents
 
 Three named agents lead the system — **FinOps Auditor**, **SecOps Guard**, and
-**Remediation Architect** — supported by eight specialised agents.
+**Remediation Architect** — supported by eight specialised agents. Owned
+architecture and technical direction for the full agent system, coordinating
+with a collaborator who led UI integration.
 
 The reasoning layer interprets natural-language queries, detects cost and
 security anomalies and configuration drift, then converts unstructured AWS

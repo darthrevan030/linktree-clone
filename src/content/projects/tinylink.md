@@ -5,7 +5,7 @@ start: "2025"
 context: Personal Project
 repo: darthrevan030/url-shortener
 order: 6
-showcase: false
+showcase: true
 links:
   - label: GitHub
     url: https://github.com/darthrevan030/url-shortener
@@ -22,6 +22,20 @@ resumeBullets:
   - "Deployed to production on Vercel with environment-based configuration for development and production base URLs"
 ---
 
-Custom short links plus auto-generated codes via nanoid, with per-link click
-tracking. RESTful endpoints for creation and redirect handling over MongoDB
-Atlas.
+## What it does
+
+A full-stack URL shortener: pick your own short link, or let nanoid
+auto-generate one. Every link tracks its own click count, so the analytics
+are per-link rather than site-wide.
+
+## Stack
+
+RESTful API endpoints handle creation and redirect resolution, backed by
+**MongoDB Atlas** for persistent storage and **Mongoose** as the ODM enforcing
+schema validation on the way in.
+
+## Deployment
+
+Deployed to production on Vercel, with environment-based configuration
+switching the base URL between development and production so short links
+resolve correctly in both.

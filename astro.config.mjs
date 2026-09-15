@@ -1,5 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import sitemap from '@astrojs/sitemap';
+import { URL } from 'node:url';
 
 import tailwindcss from '@tailwindcss/vite';
 
@@ -31,6 +33,14 @@ const posthogProxy = {
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://samarthbhatia.com',
+  integrations: [
+    sitemap({
+      // The private NFC card page (/c/<key>/) is already noindex,nofollow —
+      // keep it out of the sitemap too so it's never offered to crawlers.
+      filter: (page) => !new URL(page).pathname.startsWith('/c/'),
+    }),
+  ],
   vite: {
     plugins: [tailwindcss()],
     server: { proxy: posthogProxy },

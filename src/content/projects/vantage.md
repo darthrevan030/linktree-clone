@@ -39,6 +39,10 @@ Vantage separates them. A **deterministic FX-vs-asset gain decomposition**
 isolates how much of a return came from the asset moving and how much came from
 the currency moving, reported against an SGD base.
 
+Built as a production-grade SaaS covering equities, ETFs, crypto, gold, bonds,
+real estate, and cash across multiple brokers, leading a 3-person team through
+architecture, build, and ship.
+
 ## Architecture
 
 A four-layer stack, built for a zero-waterfall initial load:

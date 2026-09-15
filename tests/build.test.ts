@@ -12,6 +12,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import sharp from 'sharp';
 
 const DIST = join(process.cwd(), 'dist');
 
@@ -61,13 +62,19 @@ describe('build smoke test', () => {
     expect(schema.mainEntity.alumniOf.name).toContain('Nanyang Technological University');
   });
 
-  it('builds a detail page for every showcase project and none for the rest', () => {
-    for (const slug of ['vantage', 'cloud-janitor', 'not-just-black', 'trippy-find']) {
+  it('builds a detail page for every one of the nine showcased projects', () => {
+    for (const slug of [
+      'vantage',
+      'cloud-janitor',
+      'not-just-black',
+      'trippy-find',
+      'spotify-history-explorer',
+      'tinylink',
+      'ipms',
+      'home-lab',
+      'graduate-employment-survey',
+    ]) {
       expect(existsSync(join(DIST, 'projects', slug, 'index.html'))).toBe(true);
-    }
-    // Negative case: a non-showcase project must NOT get a page.
-    for (const slug of ['home-lab', 'tinylink', 'ipms']) {
-      expect(existsSync(join(DIST, 'projects', slug, 'index.html'))).toBe(false);
     }
   });
 });
@@ -86,6 +93,41 @@ describe('shared project record', () => {
     for (const name of ['Vantage', 'Cloud Janitor', 'Home Lab', 'TinyLink', 'IPMS']) {
       expect(resume).toContain(name);
     }
+  });
+});
+
+describe('SEO/discovery assets', () => {
+  it('generates a sitemap listing public pages but excluding the private NFC card route', () => {
+    const index = readFileSync(join(DIST, 'sitemap-index.xml'), 'utf8');
+    expect(index).toContain('https://samarthbhatia.com/sitemap-0.xml');
+
+    const urls = readFileSync(join(DIST, 'sitemap-0.xml'), 'utf8');
+    expect(urls).toContain('<loc>https://samarthbhatia.com/</loc>');
+    expect(urls).toContain('<loc>https://samarthbhatia.com/projects/vantage/</loc>');
+    expect(urls).not.toContain('/c/');
+  });
+
+  it('publishes a robots.txt that points crawlers at the sitemap', () => {
+    const robots = readFileSync(join(DIST, 'robots.txt'), 'utf8');
+    expect(robots).toContain('User-agent: *');
+    expect(robots).toContain('Sitemap: https://samarthbhatia.com/sitemap-index.xml');
+  });
+
+  it('publishes an llms.txt naming the real person and a real, live link', () => {
+    const llms = readFileSync(join(DIST, 'llms.txt'), 'utf8');
+    expect(llms).toContain('Samarth Bhatia');
+    expect(llms).toContain('https://github.com/darthrevan030');
+  });
+
+  it('serves a real 1200x630 og:image instead of a 404', async () => {
+    const ogPath = join(DIST, 'og.png');
+    expect(existsSync(ogPath)).toBe(true);
+    // A parseable PNG with the exact og:image dimensions, not just a
+    // nonempty file — catches a corrupt or wrongly-sized regeneration.
+    const meta = await sharp(ogPath).metadata();
+    expect(meta.format).toBe('png');
+    expect(meta.width).toBe(1200);
+    expect(meta.height).toBe(630);
   });
 });
 

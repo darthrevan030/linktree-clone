@@ -5,7 +5,7 @@ start: "2025"
 context: Personal Project
 repo: darthrevan030/Graduate-Employment-Survey
 order: 9
-showcase: false
+showcase: true
 links:
   - label: Live
     url: https://ges.samarthbhatia.dev/
@@ -20,5 +20,13 @@ resumeBullets:
   - "Built an interactive data visualisation dashboard analysing Singapore graduate employment survey data, with Python for data processing and JavaScript/Vite for the frontend"
 ---
 
-Python handles the data processing; a Vite frontend renders the interactive
-views over Singapore's graduate employment survey data.
+## What it shows
+
+An interactive dashboard over Singapore's graduate employment survey data —
+built to make a dense public dataset actually explorable instead of sitting
+in a spreadsheet.
+
+## Stack
+
+Python handles the data processing side; the frontend, built with vanilla
+JavaScript and Vite, renders the interactive views. Deployed on Vercel.

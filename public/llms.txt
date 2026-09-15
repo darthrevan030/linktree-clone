@@ -1,0 +1,22 @@
+# Samarth Bhatia
+
+> Computer Engineering undergrad at NTU Singapore with a second major in Business. Builds production-minded side projects — portfolio analytics, AWS tooling, browser extensions — and currently works as Product Lead at Money Pasar.
+
+## Current
+
+- Product Lead at [Money Pasar](https://moneypasar.com/) — cross-border transfers and collections for Southeast Asian SMEs.
+
+## Site
+
+- [Projects](https://samarthbhatia.com/projects) — nine things built, and why.
+- [Resume](https://samarthbhatia.com/resume) — experience, education, skills.
+
+## Selected projects
+
+- [Vantage](https://vantage.samarthbhatia.dev/) — multi-asset, multi-currency portfolio tracker that separates FX movement from real asset returns.
+- [Cloud Janitor](https://pypi.org/project/cloud-janitor/) — an 11-agent AWS remediation system that turns unstructured findings into reviewable Terraform.
+
+## Elsewhere
+
+- [GitHub](https://github.com/darthrevan030)
+- [LinkedIn](https://www.linkedin.com/in/samarth-bhatia-03-/)

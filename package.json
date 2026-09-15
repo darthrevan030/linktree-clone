@@ -17,9 +17,11 @@
     "lint": "eslint .",
     "prebuild": "node scripts/crop-avatar.mjs",
     "predev": "node scripts/crop-avatar.mjs",
-    "favicons": "node scripts/make-favicons.mjs"
+    "favicons": "node scripts/make-favicons.mjs",
+    "og-image": "node scripts/make-og-image.mjs"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
     "@fontsource/ibm-plex-sans": "^5.3.0",
     "@fontsource/ibm-plex-sans-condensed": "^5.3.0",
     "@fontsource/jetbrains-mono": "^5.3.0",
