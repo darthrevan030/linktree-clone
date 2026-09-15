@@ -1,0 +1,237 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { profile } from '../data/profile';
+import { socials } from '../data/socials';
+import { education, experience, skills, activities, languages, interests } from '../data/resume';
+import { obfuscateEmail } from '../lib/email';
+import { toDataAttrs, RESUME_DOWNLOAD_EVENT } from '../lib/analytics';
+import { publicAssetExists } from '../lib/assets';
+
+// Projects come from the SAME collection /projects reads. Links are never
+// duplicated into resume.ts — change a URL once and both pages update.
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+
+// Phone is deliberately never rendered here (and not stored in source).
+// Email is entity-encoded to defeat naive harvesters.
+const email = obfuscateEmail(profile.email);
+
+const surface = Astro.url.pathname;
+const hasPdf = publicAssetExists(profile.resumePdf);
+const range = (start: string, end?: string) => (end ? `${start} – ${end}` : start);
+---
+
+<Base
+  title="Resume"
+  description={`Resume of ${profile.name} — ${profile.tagline}.`}
+>
+  <div class="mx-auto max-w-3xl px-6 pb-8">
+    <header class="flex flex-col gap-6 border-b border-line py-10 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <h1 class="text-4xl font-semibold tracking-tight text-text">{profile.name}</h1>
+        <p class="mt-2 text-muted">{profile.tagline} · {profile.nationality}</p>
+        <p class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          {/*
+            The whole anchor goes through set:html on purpose. Astro escapes
+            `&` in attribute values, so passing the encoded href as href={...}
+            double-encodes it (&amp;#109;) and produces a broken link.
+            Safe from injection: email.href/text are built solely from numeric
+            &#NNN; entities, which cannot contain < > or ".
+          */}
+          <Fragment
+            set:html={`<a href="${email.href}" class="inline-flex min-h-11 items-center text-text underline decoration-line underline-offset-4 hover:decoration-accent">${email.text}</a>`}
+          />
+          {
+            socials.map((s) => (
+              <a
+                href={s.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex min-h-11 items-center text-text underline decoration-line underline-offset-4 hover:decoration-accent"
+                {...toDataAttrs({ id: s.id, label: s.label, url: s.url, kind: 'resume', surface })}
+              >
+                {s.label}
+              </a>
+            ))
+          }
+        </p>
+      </div>
+
+      {
+        hasPdf && (
+          <a
+            href={profile.resumePdf}
+            download
+            class="no-print inline-flex shrink-0 items-center justify-center rounded-xl border border-accent/40 bg-accent/10 px-5 py-3 text-sm font-medium text-text hover:border-accent"
+            data-ph-event={RESUME_DOWNLOAD_EVENT}
+            data-ph-label="resume-pdf"
+            data-ph-dest={profile.resumePdf}
+            data-ph-kind="resume"
+            data-ph-surface={surface}
+          >
+            Download PDF ↓
+          </a>
+        )
+      }
+    </header>
+
+    <section class="mt-10" aria-labelledby="education">
+      <h2 id="education" class="font-mono text-xs uppercase tracking-widest text-muted">Education</h2>
+      <div class="mt-4 space-y-8">
+        {
+          education.map((e) => (
+            <div class="print-block">
+              <div class="flex flex-wrap items-baseline justify-between gap-x-4">
+                <h3 class="font-semibold text-text">{e.institution}</h3>
+                <span class="font-mono text-xs text-muted">{range(e.start, e.end)}</span>
+              </div>
+              <p class="text-muted">{e.qualification}</p>
+              {e.detail && <p class="text-sm text-muted">{e.detail}</p>}
+              <ul class="mt-2 space-y-1.5 text-sm leading-relaxed text-muted">
+                {e.notes.map((n) => (
+                  <li class="ml-5 list-disc">{n}</li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="mt-12" aria-labelledby="experience">
+      <h2 id="experience" class="font-mono text-xs uppercase tracking-widest text-muted">Experience</h2>
+      <div class="mt-4 space-y-8">
+        {
+          experience.map((r) => (
+            <div class="print-block">
+              <div class="flex flex-wrap items-baseline justify-between gap-x-4">
+                <h3 class="font-semibold text-text">{r.title}</h3>
+                <span class="font-mono text-xs text-muted">{range(r.start, r.end)}</span>
+              </div>
+              <p class="text-muted">
+                {r.organisation}
+                {r.orgNote && <span class="text-sm"> ({r.orgNote})</span>}
+              </p>
+              <ul class="mt-2 space-y-1.5 text-sm leading-relaxed text-muted">
+                {r.bullets.map((b) => (
+                  <li class="ml-5 list-disc">{b}</li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="mt-12" aria-labelledby="projects">
+      <h2 id="projects" class="font-mono text-xs uppercase tracking-widest text-muted">
+        Projects & Achievements
+      </h2>
+      <div class="mt-4 space-y-8">
+        {
+          projects.map((project) => {
+            const p = project.data;
+            return (
+              <div class="print-block">
+                <div class="flex flex-wrap items-baseline justify-between gap-x-4">
+                  <h3 class="font-semibold text-text">
+                    {p.showcase ? (
+                      <a href={`/projects/${project.id}`} class="inline-flex min-h-6 items-center hover:text-accent">
+                        {p.name}
+                      </a>
+                    ) : (
+                      p.name
+                    )}
+                  </h3>
+                  <span class="font-mono text-xs text-muted">{range(p.start, p.end)}</span>
+                </div>
+                {(p.award || p.context) && (
+                  <p class="text-sm text-accent">{p.award ?? p.context}</p>
+                )}
+                {p.links.length > 0 && (
+                  <p class="mt-1 flex flex-wrap gap-x-3 text-sm">
+                    {p.links.map((link) => (
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex min-h-11 items-center text-text underline decoration-line underline-offset-4 hover:decoration-accent"
+                        {...toDataAttrs({
+                          id: `${project.id}:${link.label.toLowerCase()}`,
+                          label: link.label,
+                          url: link.url,
+                          kind: 'resume',
+                          surface,
+                        })}
+                      >
+                        {link.label}
+                      </a>
+                    ))}
+                  </p>
+                )}
+                <ul class="mt-2 space-y-1.5 text-sm leading-relaxed text-muted">
+                  {p.resumeBullets.map((b) => (
+                    <li class="ml-5 list-disc">{b}</li>
+                  ))}
+                </ul>
+                {p.tech.length > 0 && (
+                  <p class="mt-2 font-mono text-xs text-muted">{p.tech.join(' · ')}</p>
+                )}
+              </div>
+            );
+          })
+        }
+      </div>
+    </section>
+
+    <section class="mt-12" aria-labelledby="skills">
+      <h2 id="skills" class="font-mono text-xs uppercase tracking-widest text-muted">Technical Skills</h2>
+      <dl class="mt-4 grid gap-x-6 gap-y-3 sm:grid-cols-[max-content_1fr]">
+        {
+          skills.map((g) => (
+            <>
+              <dt class="text-sm font-medium text-text">{g.category}</dt>
+              <dd class="text-sm text-muted">{g.items.join(', ')}</dd>
+            </>
+          ))
+        }
+      </dl>
+    </section>
+
+    <section class="mt-12" aria-labelledby="activities">
+      <h2 id="activities" class="font-mono text-xs uppercase tracking-widest text-muted">
+        Co-curricular Activities
+      </h2>
+      <div class="mt-4 space-y-8">
+        {
+          activities.map((a) => (
+            <div class="print-block">
+              <div class="flex flex-wrap items-baseline justify-between gap-x-4">
+                <h3 class="font-semibold text-text">{a.title}</h3>
+                <span class="font-mono text-xs text-muted">{range(a.start, a.end)}</span>
+              </div>
+              <p class="text-muted">{a.organisation}</p>
+              <ul class="mt-2 space-y-1.5 text-sm leading-relaxed text-muted">
+                {a.bullets.map((b) => (
+                  <li class="ml-5 list-disc">{b}</li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="mt-12" aria-labelledby="languages">
+      <h2 id="languages" class="font-mono text-xs uppercase tracking-widest text-muted">
+        Languages & Interests
+      </h2>
+      <dl class="mt-4 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-[max-content_1fr]">
+        <dt class="font-medium text-text">Languages</dt>
+        <dd class="text-muted">{languages.join(', ')}</dd>
+        <dt class="font-medium text-text">Interests</dt>
+        <dd class="text-muted">{interests.join(', ')}</dd>
+      </dl>
+    </section>
+  </div>
+</Base>

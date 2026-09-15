@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+/*
+ * Baseline tokens only. The deliberate visual identity comes in the design
+ * pass (build step 7) — these exist so every page is legible and consistent
+ * until then, and so that pass has one place to change.
+ */
+@theme {
+  --color-ink: #0b0c0e;
+  --color-surface: #141519;
+  --color-line: #26282e;
+  --color-muted: #8b8f98;
+  --color-text: #e8e9ec;
+  --color-accent: #7cc4ff;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+html {
+  background: var(--color-ink);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Visible, consistent keyboard focus everywhere. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/*
+ * Print: a sanity pass, not a quality gate. The recruiter-facing PDF is the
+ * Word export served as a download — this only stops /resume printing
+ * embarrassingly if someone hits Cmd+P anyway.
+ */
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-block {
+    break-inside: avoid;
+  }
+
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  a {
+    color: #000 !important;
+    text-decoration: none !important;
+  }
+}

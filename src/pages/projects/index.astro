@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { fetchRepoStats } from '../../lib/github';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+
+// Fetched in parallel at build time. fetchRepoStats never throws and returns
+// null on any failure, so a GitHub outage cannot fail this page.
+const stats = await Promise.all(
+  projects.map((p) => (p.data.repo ? fetchRepoStats(p.data.repo) : Promise.resolve(null))),
+);
+---
+
+<Base
+  title="Projects"
+  description="Things Samarth Bhatia has built — portfolio analytics, AWS remediation agents, browser extensions, and more."
+>
+  <div class="mx-auto max-w-3xl px-6 pb-8">
+    <header class="py-10">
+      <h1 class="text-4xl font-semibold tracking-tight text-text">Projects</h1>
+      <p class="mt-3 max-w-xl text-muted">
+        {projects.length} things I built. The first four have full write-ups on the
+        engineering decisions behind them.
+      </p>
+    </header>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      {projects.map((project, i) => <ProjectCard project={project} stats={stats[i] ?? null} />)}
+    </div>
+  </div>
+</Base>

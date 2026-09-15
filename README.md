@@ -1,43 +1,100 @@
-# Astro Starter Kit: Minimal
+# samarthbhatia.com
 
-```sh
-npm create astro@latest -- --template minimal
-```
+Personal link hub, projects, and resume — a self-hosted Linktree replacement
+with first-party analytics. Static Astro site on Vercel.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Commands
 
-## 🚀 Project Structure
+| Command               | What it does                                               |
+| --------------------- | ---------------------------------------------------------- |
+| `npm run dev`         | Dev server (use `astro dev --background` for background)   |
+| `npm run build`       | Production build to `dist/`                                |
+| `npm run preview`     | Serve the built site locally                               |
+| `npm test`            | Build, then run all tests (unit + built-output)            |
+| `npm run check`       | Type-check (`astro check`)                                 |
+| `npm run lint`        | ESLint across `.ts`, `.astro`, and scripts                 |
+| `npm run check:links` | Probe every outbound link — manual, not a CI gate          |
 
-Inside of your Astro project, you'll see the following folders and files:
+## Where things live
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+| To change…                        | Edit                                   |
+| --------------------------------- | -------------------------------------- |
+| Name, tagline, bio, email         | `src/data/profile.ts`                  |
+| Hub page buttons                  | `src/data/links.ts`                    |
+| Footer social links               | `src/data/socials.ts`                  |
+| Education, jobs, skills, CCAs     | `src/data/resume.ts`                   |
+| A project (resume + projects)     | `src/content/projects/<name>.md`       |
+| Resume PDF download               | `public/Samarth-Bhatia-Resume.pdf`     |
+| Avatar photo                      | `public/samarth-bhatia.jpg`            |
+| Social preview image              | `public/og.png`                        |
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+Each project is **one file read by two pages**. Change a link once and both
+`/resume` and `/projects` update. Set `showcase: true` to give a project its own
+write-up page, built from the Markdown body.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+Missing assets degrade cleanly: no avatar photo shows an initials monogram, and
+no resume PDF hides the download button. Drop the file in and it appears.
 
-Any static assets, like images, can be placed in the `public/` directory.
+The avatar is imported (not linked) so Astro emits small WebP copies at build
+time — keep the full-size original in `public/`; there is no need to resize it.
 
-## 🧞 Commands
+## Resume update runbook
 
-All commands are run from the root of the project, from a terminal:
+The **Word doc stays your working copy** — tailor it per application as usual.
+This repo holds the canonical *public* resume, updated only when **facts**
+change (a new role or project), never for per-application wording.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+1. Update the Word doc as you already do.
+2. Export a fresh, untailored PDF over `public/Samarth-Bhatia-Resume.pdf`.
+   **Remove your phone number from this export first** — the file is publicly
+   downloadable and indexed by search engines.
+3. Paste the changed section to an AI, naming the destination:
+   - a new **job or education entry** → `src/data/resume.ts`
+   - a new **project** → a new file in `src/content/projects/`
+     (copy an existing one for the shape)
+4. `npm test` — if the schema rejects the entry, it was malformed. This is the
+   safety net on AI-generated edits.
+5. Push. Vercel deploys.
 
-## 👀 Want to learn more?
+## Analytics
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+PostHog (EU), proxied through this domain via `vercel.json` rewrites on
+`/insights/*`, so requests are first-party and survive ad blockers. Cookieless —
+no consent banner.
+
+Tracked events:
+
+- `link_click` — every tracked link, with `label`, `destination`, `kind`, `surface`
+- `resume_download` — the PDF button
+- `$pageview` / `$pageleave` — automatic
+
+The proxy is a **Vercel rewrite** and does not exist under `astro dev` or
+`astro preview`. Verify analytics on a deployment, not locally.
+
+## Environment
+
+Copy `.env.example` to `.env`. Set the same variables in Vercel → Settings →
+Environment Variables.
+
+- `PUBLIC_POSTHOG_KEY` — PostHog project token. Public by design.
+- `GITHUB_TOKEN` — **secret**, build-time only, never `PUBLIC_`-prefixed.
+  Optional: without it the build still succeeds, but repo star counts go
+  missing once the unauthenticated limit (60/hr, shared across Vercel runners)
+  is hit.
+
+## Known issue: Windows local builds
+
+Node 24 on Windows can abort at process exit with
+`Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)` when a keep-alive
+socket is still open ([nodejs/node#56645](https://github.com/nodejs/node/issues/56645)).
+The build had already succeeded when this happened, but the non-zero exit code
+broke `npm test`.
+
+Build-time fetches therefore use undici with keep-alive disabled
+(`src/lib/github.ts`, `scripts/check-links.mjs`). This does not affect Vercel,
+which builds on Linux. If the assertion reappears, check for a new build-time
+`fetch()` that bypasses that dispatcher.
+
+`astro check` also needs **TypeScript 6**: the TypeScript 7 native compiler does
+not yet expose the API it relies on. Don't upgrade TypeScript past 6 until that
+changes.

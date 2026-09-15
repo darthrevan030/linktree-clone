@@ -1,0 +1,70 @@
+---
+/**
+ * PostHog analytics, loaded without blocking first paint.
+ *
+ * - Requests go through /insights/* (see vercel.json), so they are
+ *   same-origin: first-party, and not matched by blocker hostname lists.
+ * - Cookieless (`persistence: 'memory'`) — no consent banner required.
+ * - ONE delegated click listener reads data-ph-* attributes produced by
+ *   src/lib/analytics.ts, so adding a link never adds JavaScript.
+ *
+ * If PUBLIC_POSTHOG_KEY is unset (e.g. local dev), this is a silent no-op.
+ */
+---
+
+<script>
+  import type { PostHog } from 'posthog-js';
+
+  const key = import.meta.env.PUBLIC_POSTHOG_KEY;
+
+  type Pending = { event: string; props: Record<string, string> };
+
+  let client: PostHog | null = null;
+  const queue: Pending[] = [];
+
+  function send(event: string, props: Record<string, string>) {
+    if (client) client.capture(event, props);
+    else queue.push({ event, props });
+  }
+
+  async function load() {
+    const { default: posthog } = await import('posthog-js');
+    posthog.init(key, {
+      api_host: '/insights',
+      ui_host: 'https://eu.posthog.com',
+      persistence: 'memory',
+      person_profiles: 'identified_only',
+      autocapture: false,
+      disable_session_recording: true,
+      capture_pageview: true,
+      capture_pageleave: true,
+    });
+    client = posthog;
+    // Flush anything clicked while the library was still loading.
+    for (const { event, props } of queue.splice(0)) client.capture(event, props);
+  }
+
+  if (key) {
+    // Attach the listener immediately so early clicks are queued, not lost.
+    document.addEventListener('click', (e) => {
+      const el = (e.target as Element | null)?.closest<HTMLElement>('[data-ph-event]');
+      if (!el) return;
+      const d = el.dataset;
+      send(d.phEvent!, {
+        label: d.phLabel ?? '',
+        destination: d.phDest ?? '',
+        kind: d.phKind ?? '',
+        surface: d.phSurface ?? '',
+      });
+    });
+
+    // Defer the library itself until the browser is idle, capped so it still
+    // loads promptly on busy pages. It never competes with first paint.
+    const start = () => void load();
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(start, { timeout: 2000 });
+    } else {
+      setTimeout(start, 1500);
+    }
+  }
+</script>

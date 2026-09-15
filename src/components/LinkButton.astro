@@ -1,0 +1,39 @@
+---
+import { toDataAttrs, isOutbound, type TrackableKind } from '../lib/analytics';
+
+interface Props {
+  id: string;
+  label: string;
+  description?: string;
+  url: string;
+  kind?: TrackableKind;
+  featured?: boolean;
+}
+
+const { id, label, description, url, kind = 'hub', featured = false } = Astro.props;
+const external = isOutbound(url);
+const surface = Astro.url.pathname;
+---
+
+<a
+  href={url}
+  {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+  {...toDataAttrs({ id, label, url, kind, surface })}
+  class:list={[
+    'group flex min-h-14 items-center justify-between gap-4 rounded-xl border px-5 py-4 transition-colors',
+    featured
+      ? 'border-accent/40 bg-accent/10 hover:border-accent hover:bg-accent/15'
+      : 'border-line bg-surface hover:border-muted',
+  ]}
+>
+  <span class="flex flex-col">
+    <span class="font-medium text-text">{label}</span>
+    {description && <span class="text-sm text-muted">{description}</span>}
+  </span>
+  <span
+    class="text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-text"
+    aria-hidden="true"
+  >
+    {external ? '↗' : '→'}
+  </span>
+</a>
