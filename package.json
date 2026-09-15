@@ -16,7 +16,8 @@
     "check:links": "node scripts/check-links.mjs",
     "lint": "eslint .",
     "prebuild": "node scripts/crop-avatar.mjs",
-    "predev": "node scripts/crop-avatar.mjs"
+    "predev": "node scripts/crop-avatar.mjs",
+    "favicons": "node scripts/make-favicons.mjs"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans": "^5.3.0",

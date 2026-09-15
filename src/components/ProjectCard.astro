@@ -1,6 +1,13 @@
 ---
+/**
+ * A project drawn as a component on the board.
+ *
+ * The designator (U2, U3, ...) follows the hub chip U1 in project order, the
+ * way reference designators number the parts on a real PCB. The label cuts
+ * into the outline, like silkscreen text sitting on a component courtyard.
+ */
 import type { CollectionEntry } from 'astro:content';
-import type { RepoStats } from '../lib/github';
+import { statsLabel, type RepoStats } from '../lib/github';
 import { toDataAttrs } from '../lib/analytics';
 
 interface Props {
@@ -13,12 +20,23 @@ const { project, stats } = Astro.props;
 const p = project.data;
 const surface = Astro.url.pathname;
 const dates = p.end ? `${p.start} – ${p.end}` : p.start;
+const designator = `U${p.order + 1}`;
+// Stats are an enhancement, never part of the layout skeleton: null renders
+// nothing and the card still looks complete.
+const stat = statsLabel(stats);
 ---
 
-<article class="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-6">
-  <header class="flex flex-col gap-1">
+<article class="relative flex flex-col rounded-md border border-line bg-surface px-6 pt-7 pb-4">
+  <span
+    class="absolute -top-2.5 left-4 bg-ink px-1.5 font-mono text-[0.65rem] tracking-[0.2em] text-muted"
+    aria-hidden="true"
+  >
+    {designator}
+  </span>
+
+  <header>
     <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-      <h3 class="text-lg font-semibold text-text">
+      <h2 class="font-display text-2xl leading-tight font-semibold tracking-wide text-text uppercase">
         {
           p.showcase ? (
             <a href={`/projects/${project.id}`} class="hover:text-accent">
@@ -28,32 +46,31 @@ const dates = p.end ? `${p.start} – ${p.end}` : p.start;
             p.name
           )
         }
-      </h3>
+      </h2>
       <span class="font-mono text-xs text-muted">{dates}</span>
     </div>
-    {p.award && <p class="text-sm text-accent">{p.award}</p>}
+    {p.award && <p class="mt-1 text-sm text-accent">{p.award}</p>}
   </header>
 
-  <p class="text-sm leading-relaxed text-muted">{p.tagline}</p>
+  <p class="mt-3 text-sm leading-relaxed text-muted">{p.tagline}</p>
 
   {
     p.tech.length > 0 && (
-      <ul class="flex flex-wrap gap-1.5" aria-label="Tech stack">
-        {p.tech.map((t) => (
-          <li class="rounded-md border border-line px-2 py-0.5 font-mono text-xs text-muted">{t}</li>
-        ))}
-      </ul>
+      <p class="mt-4 font-mono text-xs leading-relaxed text-muted">
+        <span class="sr-only">Tech stack: </span>
+        {p.tech.join(' · ')}
+      </p>
     )
   }
 
-  <footer class="mt-auto flex flex-wrap items-center gap-x-4 gap-y-2 pt-2 text-sm">
+  <footer class="mt-auto flex flex-wrap items-center gap-x-5 border-t border-line/60 pt-1 font-mono text-xs tracking-widest uppercase">
     {
       p.links.map((link) => (
         <a
           href={link.url}
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex min-h-11 items-center text-text underline decoration-line underline-offset-4 hover:decoration-accent"
+          class="inline-flex min-h-11 items-center gap-1 text-text hover:text-accent"
           {...toDataAttrs({
             id: `${project.id}:${link.label.toLowerCase()}`,
             label: link.label,
@@ -63,27 +80,17 @@ const dates = p.end ? `${p.start} – ${p.end}` : p.start;
           })}
         >
           {link.label}
+          <span aria-hidden="true">↗</span>
         </a>
       ))
     }
     {
       p.showcase && (
-        <a href={`/projects/${project.id}`} class="inline-flex min-h-11 items-center text-muted hover:text-text">
-          Read more →
+        <a href={`/projects/${project.id}`} class="inline-flex min-h-11 items-center gap-1 text-accent hover:text-text">
+          Write-up <span aria-hidden="true">→</span>
         </a>
       )
     }
-    {/*
-      Stats are an enhancement, never part of the layout skeleton: when
-      `stats` is null this renders nothing and the card still looks complete.
-    */}
-    {
-      stats && (
-        <span class="ml-auto font-mono text-xs text-muted">
-          ★ {stats.stars}
-          {stats.language && ` · ${stats.language}`}
-        </span>
-      )
-    }
+    {stat && <span class="ml-auto normal-case tracking-normal text-muted">{stat}</span>}
   </footer>
 </article>

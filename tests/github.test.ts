@@ -14,7 +14,7 @@ vi.mock('undici', async (importOriginal) => {
 });
 
 import { Agent } from 'undici';
-import { fetchRepoStats, __clearCache } from '../src/lib/github';
+import { fetchRepoStats, statsLabel, __clearCache } from '../src/lib/github';
 
 type UndiciResponse = Awaited<ReturnType<typeof undiciFetch>>;
 
@@ -113,5 +113,24 @@ describe('fetchRepoStats', () => {
     await fetchRepoStats(REPO, undefined);
 
     expect(initOf().dispatcher).toBeInstanceOf(Agent);
+  });
+});
+
+describe('statsLabel', () => {
+  it('shows stars and language when the repo has stars', () => {
+    expect(statsLabel({ stars: 12, language: 'Python', pushedAt: null })).toBe('★ 12 · Python');
+  });
+
+  it('omits a zero star count rather than advertising "★ 0"', () => {
+    expect(statsLabel({ stars: 0, language: 'TypeScript', pushedAt: null })).toBe('TypeScript');
+  });
+
+  it('shows stars alone when the language is unknown', () => {
+    expect(statsLabel({ stars: 3, language: null, pushedAt: null })).toBe('★ 3');
+  });
+
+  it('returns null when there is nothing worth showing', () => {
+    expect(statsLabel({ stars: 0, language: null, pushedAt: null })).toBeNull();
+    expect(statsLabel(null)).toBeNull();
   });
 });

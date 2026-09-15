@@ -11,6 +11,10 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
 const stats = await Promise.all(
   projects.map((p) => (p.data.repo ? fetchRepoStats(p.data.repo) : Promise.resolve(null))),
 );
+
+const showcaseCount = projects.filter((p) => p.data.showcase).length;
+const words = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+const inWords = (n: number) => words[n] ?? String(n);
 ---
 
 <Base
@@ -19,14 +23,19 @@ const stats = await Promise.all(
 >
   <div class="mx-auto max-w-3xl px-6 pb-8">
     <header class="py-10">
-      <h1 class="text-4xl font-semibold tracking-tight text-text">Projects</h1>
-      <p class="mt-3 max-w-xl text-muted">
-        {projects.length} things I built. The first four have full write-ups on the
-        engineering decisions behind them.
+      <p class="font-mono text-[0.65rem] tracking-[0.25em] text-muted uppercase">
+        U2–U{projects.length + 1}
+      </p>
+      <h1 class="mt-1 font-display text-5xl font-semibold tracking-wide text-text uppercase">Projects</h1>
+      <p class="mt-3 max-w-xl text-balance text-muted">
+        {projects.length} things I built. {
+          showcaseCount > 0 &&
+            `The ${inWords(showcaseCount)} with write-ups cover the engineering decisions behind them.`
+        }
       </p>
     </header>
 
-    <div class="grid gap-4 sm:grid-cols-2">
+    <div class="grid gap-x-4 gap-y-7 sm:grid-cols-2">
       {projects.map((project, i) => <ProjectCard project={project} stats={stats[i] ?? null} />)}
     </div>
   </div>

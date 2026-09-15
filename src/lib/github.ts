@@ -94,3 +94,15 @@ export async function fetchRepoStats(
   cache.set(repo, stats);
   return stats;
 }
+
+/**
+ * The stats line shown on a project card, or null to show nothing.
+ *
+ * A zero star count is omitted rather than displayed: on a recruiter-facing
+ * page "★ 0" undersells the work and adds no information.
+ */
+export function statsLabel(stats: RepoStats | null): string | null {
+  if (!stats) return null;
+  const parts = [stats.stars > 0 ? `★ ${stats.stars}` : null, stats.language].filter(Boolean);
+  return parts.length > 0 ? parts.join(' · ') : null;
+}
