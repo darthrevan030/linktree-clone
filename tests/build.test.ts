@@ -40,6 +40,27 @@ describe('build smoke test', () => {
     expect(hub).toContain('Samarth Bhatia');
   });
 
+  it('marks social profile links as rel="me" so crawlers can verify identity', () => {
+    for (const doc of [hub, projects, resume]) {
+      const githubLink = doc.match(/<a[^>]*href="https:\/\/github\.com\/darthrevan030"[^>]*>/)?.[0];
+      expect(githubLink).toBeDefined();
+      expect(githubLink).toMatch(/rel="[^"]*\bme\b[^"]*"/);
+    }
+  });
+
+  it('embeds a JSON-LD Person schema on the hub, sourced from real profile data', () => {
+    const block = hub.match(
+      /<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/,
+    )?.[1];
+    expect(block).toBeDefined();
+    const schema = JSON.parse(block!);
+    expect(schema['@type']).toBe('ProfilePage');
+    expect(schema.mainEntity.name).toBe('Samarth Bhatia');
+    expect(schema.mainEntity.jobTitle).toBe('Product Lead');
+    expect(schema.mainEntity.sameAs).toContain('https://github.com/darthrevan030');
+    expect(schema.mainEntity.alumniOf.name).toContain('Nanyang Technological University');
+  });
+
   it('builds a detail page for every showcase project and none for the rest', () => {
     for (const slug of ['vantage', 'cloud-janitor', 'not-just-black', 'trippy-find']) {
       expect(existsSync(join(DIST, 'projects', slug, 'index.html'))).toBe(true);
