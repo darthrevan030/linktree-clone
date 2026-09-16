@@ -65,8 +65,13 @@ change (a new role or project), never for per-application wording.
 ## Analytics
 
 PostHog (EU), proxied through this domain via `vercel.json` rewrites on
-`/insights/*`, so requests are first-party and survive ad blockers. Cookieless —
-no consent banner.
+`/insights/*`, so requests are first-party and survive ad blockers.
+
+Visitors carry a persistent ID (localStorage + cookie), so one person's
+pageviews, clicks and session recording stitch together and return visits are
+recognised. **This sets cookies and records sessions, and there is no consent
+banner** — a deliberate choice, but note that GDPR follows the visitor's
+location, not the site owner's.
 
 Tracked events:
 
@@ -74,6 +79,27 @@ Tracked events:
 - `resume_download` — the PDF button
 - `contact_save` — the Save contact button
 - `$pageview` / `$pageleave` — automatic
+- `$snapshot` — session recordings
+
+### Session recording
+
+`disable_session_recording: false` in `Analytics.astro` is necessary but **not
+sufficient**: Session Replay must also be switched on in the PostHog project
+settings, or nothing records.
+
+Input values are masked by PostHog's defaults. The recorder bundle loads from
+`/insights/static/recorder.js` and snapshots POST to `/insights/s/`, both
+already covered by the existing rewrites — no `vercel.json` change needed.
+
+Recording begins when PostHog loads, which is deferred to browser idle (2s cap),
+so the first second or two of a visit is missing from the recording. That is the
+price of never competing with first paint.
+
+**The card key never reaches PostHog.** On `/c/<key>` the key is embedded in the
+rrweb payload — the Meta record's `href`, captured DOM attributes — where the
+property-level `scrubCardPaths` cannot see it. So on that page `before_send` also
+runs `scrubCardPathsDeep` over `$snapshot_data`, rewriting every `/c/<key>` to
+`/c/card`. Covered by `tests/analytics.test.ts`.
 
 On Vercel the proxy is a rewrite in `vercel.json`. Locally, `astro.config.mjs`
 mirrors the same rules in the dev server, so `npm run dev` sends real events —

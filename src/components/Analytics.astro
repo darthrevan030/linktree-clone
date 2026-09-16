@@ -4,7 +4,11 @@
  *
  * - Requests go through /insights/* (see vercel.json), so they are
  *   same-origin: first-party, and not matched by blocker hostname lists.
- * - Cookieless (`persistence: 'memory'`) — no consent banner required.
+ * - Persistent visitor ID (localStorage + cookie), so one person's pageviews,
+ *   clicks and recording stitch together and return visits are recognised.
+ *   This sets cookies — see README → Analytics.
+ * - Session recording is on. On the private card page its payload gets a deep
+ *   scrub, because the card key sits in the URL rrweb records.
  * - ONE delegated click listener reads data-ph-* attributes produced by
  *   src/lib/analytics.ts, so adding a link never adds JavaScript.
  *
@@ -14,11 +18,13 @@
 
 <script>
   import type { PostHog } from 'posthog-js';
-  import { scrubCardPaths } from '../lib/analytics';
+  import { scrubCardPaths, scrubCardPathsDeep, isCardPath } from '../lib/analytics';
 
   const key = import.meta.env.PUBLIC_POSTHOG_KEY;
   /** "nfc-card" on the private card page, so taps are attributable. */
   const source = document.documentElement.dataset.source;
+  /** Recordings of this page embed the card key, so they need the deep scrub. */
+  const onCardPage = isCardPath(location.pathname);
 
   type Pending = { event: string; props: Record<string, string> };
 
@@ -35,10 +41,13 @@
     posthog.init(key, {
       api_host: '/insights',
       ui_host: 'https://eu.posthog.com',
-      persistence: 'memory',
-      person_profiles: 'identified_only',
+      persistence: 'localStorage+cookie',
+      // 'always' so anonymous visitors get a person profile. Without one there
+      // is no timeline tying a visitor's pageviews, clicks and return visits
+      // together, which is the whole point of seeing who clicked what.
+      person_profiles: 'always',
       autocapture: false,
-      disable_session_recording: true,
+      disable_session_recording: false,
       capture_pageview: true,
       capture_pageleave: true,
       // Local testing sends real events (via the dev proxy in astro.config.mjs).
@@ -47,9 +56,14 @@
         if (import.meta.env.DEV) ph.register({ environment: 'development' });
       },
       // The card URL contains the private key; strip it from every event so
-      // the key is never stored in PostHog.
+      // the key is never stored in PostHog. Recordings hide it one level down,
+      // inside the rrweb payload, where the property-level scrub cannot reach.
       before_send: (event) => {
-        if (event?.properties) event.properties = scrubCardPaths(event.properties);
+        if (!event?.properties) return event;
+        event.properties = scrubCardPaths(event.properties);
+        if (onCardPage && event.event === '$snapshot' && event.properties.$snapshot_data) {
+          event.properties.$snapshot_data = scrubCardPathsDeep(event.properties.$snapshot_data);
+        }
         return event;
       },
     });

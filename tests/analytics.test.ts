@@ -5,6 +5,8 @@ import {
   toDataAttrs,
   LINK_CLICK_EVENT,
   scrubCardPaths,
+  scrubCardPathsDeep,
+  isCardPath,
   type TrackedLink,
 } from '../src/lib/analytics';
 
@@ -128,5 +130,130 @@ describe('scrubCardPaths', () => {
   it('does not treat unrelated paths that merely contain "c" as card paths', () => {
     expect(scrubCardPaths({ u: '/projects/cloud-janitor/' }).u).toBe('/projects/cloud-janitor/');
     expect(scrubCardPaths({ u: 'https://example.com/abc/def' }).u).toBe('https://example.com/abc/def');
+  });
+});
+
+describe('isCardPath', () => {
+  it.each([
+    ['/c/k8Tq2xVn7LpR4mWz9cYb', true],
+    ['/c/k8Tq2xVn7LpR4mWz9cYb/', true],
+    ['/c/k8Tq2xVn7LpR4mWz9cYb/samarth-bhatia.vcf', true],
+    ['/', false],
+    ['/resume/', false],
+    ['/projects/cloud-janitor/', false],
+    // No key at all — nothing private to protect.
+    ['/c/', false],
+  ])('classifies %s as card path=%s', (pathname, expected) => {
+    expect(isCardPath(pathname)).toBe(expected);
+  });
+
+  it('returns the same answer when asked twice', () => {
+    // CARD_PATH is a /g regex. Calling .test() on a global regex advances
+    // lastIndex, so a naive implementation returns true then false for the
+    // same input — and recordings would leak the key on every other page.
+    const cardPath = '/c/k8Tq2xVn7LpR4mWz9cYb/';
+    expect(isCardPath(cardPath)).toBe(true);
+    expect(isCardPath(cardPath)).toBe(true);
+  });
+});
+
+describe('scrubCardPathsDeep', () => {
+  const KEY = 'k8Tq2xVn7LpR4mWz9cYb';
+
+  /**
+   * Shaped like a real PostHog $snapshot payload: an array of rrweb events
+   * where type 4 is Meta (carries the page href) and type 2 is a full DOM
+   * snapshot. The card key appears in both, several levels deep — neither is
+   * a top-level string property, which is why scrubCardPaths cannot see them.
+   */
+  const snapshotData = () => [
+    {
+      type: 4,
+      timestamp: 1758000000000,
+      data: { href: `https://samarthbhatia.com/c/${KEY}/`, width: 390, height: 844 },
+    },
+    {
+      type: 2,
+      timestamp: 1758000000042,
+      data: {
+        node: {
+          id: 1,
+          tagName: 'html',
+          attributes: { 'data-source': 'nfc-card' },
+          childNodes: [
+            {
+              id: 7,
+              tagName: 'a',
+              attributes: { href: `/c/${KEY}/samarth-bhatia.vcf`, download: '' },
+              childNodes: [{ id: 8, type: 3, textContent: 'Save contact' }],
+            },
+            {
+              id: 9,
+              tagName: 'a',
+              attributes: { href: 'https://github.com/darthrevan030' },
+              childNodes: [{ id: 10, type: 3, textContent: 'GitHub' }],
+            },
+          ],
+        },
+        initialOffset: { top: 0, left: 0 },
+      },
+    },
+  ];
+
+  it('removes the card key from every level of the payload', () => {
+    expect(JSON.stringify(scrubCardPathsDeep(snapshotData()))).not.toContain(KEY);
+  });
+
+  it('changes nothing except the card key', () => {
+    // Written out by hand rather than derived from the fixture. A scrubber
+    // that dropped or flattened the payload would still satisfy "the key is
+    // gone" above, and a recording without its DOM plays back as nothing.
+    expect(scrubCardPathsDeep(snapshotData())).toEqual([
+      {
+        type: 4,
+        timestamp: 1758000000000,
+        data: { href: 'https://samarthbhatia.com/c/card/', width: 390, height: 844 },
+      },
+      {
+        type: 2,
+        timestamp: 1758000000042,
+        data: {
+          node: {
+            id: 1,
+            tagName: 'html',
+            attributes: { 'data-source': 'nfc-card' },
+            childNodes: [
+              {
+                id: 7,
+                tagName: 'a',
+                attributes: { href: '/c/card/samarth-bhatia.vcf', download: '' },
+                childNodes: [{ id: 8, type: 3, textContent: 'Save contact' }],
+              },
+              {
+                id: 9,
+                tagName: 'a',
+                attributes: { href: 'https://github.com/darthrevan030' },
+                childNodes: [{ id: 10, type: 3, textContent: 'GitHub' }],
+              },
+            ],
+          },
+          initialOffset: { top: 0, left: 0 },
+        },
+      },
+    ]);
+  });
+
+  it('leaves a payload with no card path structurally identical', () => {
+    const clean = [
+      { type: 4, data: { href: 'https://samarthbhatia.com/resume/', width: 1440 } },
+      { type: 3, data: { source: 2, id: 7, x: 10, y: 20 } },
+    ];
+    expect(scrubCardPathsDeep(clean)).toEqual(clean);
+  });
+
+  it('does not mutate the payload it was given', () => {
+    const original = snapshotData();
+    scrubCardPathsDeep(original);
+    expect(original[0].data.href).toContain(KEY);
   });
 });

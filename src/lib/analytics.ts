@@ -57,6 +57,35 @@ export function scrubCardPaths<T extends Record<string, unknown>>(properties: T)
 }
 
 /**
+ * Non-global twin of CARD_PATH, for testing rather than replacing.
+ *
+ * `.test()` on a /g regex advances its lastIndex, so reusing CARD_PATH here
+ * would return true, then false, then true for the same path.
+ */
+const CARD_PATH_TEST = new RegExp(CARD_PATH.source);
+
+/** True when this pathname is the private card page. */
+export function isCardPath(pathname: string): boolean {
+  return CARD_PATH_TEST.test(pathname);
+}
+
+/**
+ * Scrub the card key from a nested structure — specifically the rrweb event
+ * array inside a `$snapshot` (session recording) event.
+ *
+ * `scrubCardPaths` only reaches top-level string properties, but a recording
+ * carries the page URL deep inside `$snapshot_data`: in the rrweb Meta record
+ * and in captured DOM attributes. Round-tripping through JSON catches every
+ * one of them regardless of shape, and returns a fresh object, so the payload
+ * PostHog is about to send is the only thing changed.
+ *
+ * Only worth its cost on the card page — see the caller in Analytics.astro.
+ */
+export function scrubCardPathsDeep<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value).replace(CARD_PATH, '/c/card')) as T;
+}
+
+/**
  * True when the href leaves this site. Protocol-relative and absolute URLs
  * count as outbound; root-relative paths and fragments do not.
  */
