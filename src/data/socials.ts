@@ -22,15 +22,27 @@ export type Social = {
  */
 export const socials: Social[] = [
   {
-    id: 'github',
-    label: 'GitHub',
-    url: 'https://github.com/darthrevan030',
-    handle: 'darthrevan030',
+    id: "github",
+    label: "GitHub",
+    url: "https://github.com/darthrevan030",
+    handle: "darthrevan030",
   },
   {
-    id: 'linkedin',
-    label: 'LinkedIn',
-    url: 'https://www.linkedin.com/in/samarth-bhatia-03-/',
-    handle: 'samarth-bhatia-03-',
+    id: "linkedin",
+    label: "LinkedIn",
+    url: "https://www.linkedin.com/in/samarth-bhatia-03-/",
+    handle: "samarth-bhatia-03-",
+  },
+  {
+    id: "photography-instagram",
+    label: "Photography",
+    url: "https://www.instagram.com/samarthjpg/",
+    handle: "samarthjpg",
+  },
+  {
+    id: "instagram",
+    label: "Instagram",
+    url: "https://www.instagram.com/not_htramas/",
+    handle: "not_htramas",
   },
 ];
