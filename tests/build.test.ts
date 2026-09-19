@@ -49,6 +49,40 @@ describe('build smoke test', () => {
     }
   });
 
+  it('shows the photography profile as hub pin 2 and still as a test point', () => {
+    const url = 'https://www.instagram.com/samarthjpg/';
+
+    // Pin 2 of chip U1. Each segment is cut at its own </li> so a match in the
+    // test point row, the footer or the JSON-LD block cannot satisfy this.
+    const pinSegments = hub
+      .split('<li class="pin')
+      .slice(1)
+      .map((seg) => seg.slice(0, seg.indexOf('</li>')));
+    const pinned = pinSegments.filter((seg) => seg.includes(`href="${url}"`));
+    expect(pinned).toHaveLength(1);
+    expect(pinned[0]).toMatch(/--pin: 2;/);
+    expect(pinned[0]).toContain('data-ph-kind="hub"');
+    expect(pinned[0]).toContain('data-ph-label="photography-instagram"');
+
+    // Still a test point, so the rel="me" chain survives on the hub.
+    const tpStart = hub.indexOf('id="tp-heading"');
+    const tps = hub.slice(tpStart, hub.indexOf('</section>', tpStart));
+    const tpLink = tps.match(new RegExp(`<a[^>]*href="${url}"[^>]*>`))?.[0];
+    expect(tpLink).toBeDefined();
+    expect(tpLink).toMatch(/rel="[^"]*\bme\b[^"]*"/);
+    expect(tpLink).toContain('data-ph-kind="social"');
+  });
+
+  it('keeps every social in the footer of the non-bare pages', () => {
+    for (const doc of [projects, resume]) {
+      // Project cards have footers of their own; the site footer is the last.
+      const footer = doc.slice(doc.lastIndexOf('<footer'));
+      for (const label of ['GitHub', 'LinkedIn', 'Photography', 'Instagram']) {
+        expect(footer).toContain(`>${label}</a>`);
+      }
+    }
+  });
+
   it('embeds a JSON-LD Person schema on the hub, sourced from real profile data', () => {
     const block = hub.match(
       /<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/,
