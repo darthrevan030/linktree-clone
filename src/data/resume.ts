@@ -27,6 +27,7 @@ export type Role = {
   start: string;
   end: string;
   bullets: string[];
+  techStack?: string[];
 };
 
 export type SkillGroup = {
@@ -52,7 +53,7 @@ export const education: Education[] = [
     notes: [
       'Honours (Merit)',
       'Semester Exchange — Universidad Carlos III de Madrid, Spain (Aug – Dec 2026)',
-      'GEM Ambassador, Office of Global Education and Mobility (OGEM) — selected for ambassadorial programme based on leadership, cultural intelligence, and international outlook. Responsibilities include mentoring peers and representing NTU at host university exchange fairs',
+      'GEM Ambassador, Office of Global Education and Mobility: selected on leadership and cultural intelligence; mentor peers and represent NTU at host-university exchange fairs',
       'Relevant modules — Introduction to Computational Thinking & Programming, Digital Logic, Computer Organisation & Architecture, C & C++ Programming, Data Structures and Algorithms, Algorithm Design & Analysis, Object Oriented Design & Programming, Financial Management, Financial Accounting, Commodity Markets, Marketing',
     ],
   },
@@ -70,37 +71,18 @@ export const education: Education[] = [
 
 export const experience: Role[] = [
   {
-    title: 'Business Analyst Intern',
-    organisation: 'Temus',
-    orgNote: 'Temasek × US Tech JV',
-    start: 'Jan 2026',
-    end: 'Apr 2026',
-    bullets: [
-      'Worked in Agile/Scrum squads delivering digital transformation projects, writing user stories and acceptance criteria for platform features across product, engineering, and design',
-      'Delivered stakeholder demos presenting feature progress to senior leadership, translating technical complexity into business outcomes',
-      'Used Jira for sprint planning, backlog grooming, and cross-functional coordination',
-    ],
-  },
-  {
-    title: 'QA Engineer Intern',
-    organisation: 'Temus',
-    orgNote: 'Temasek × US Tech JV',
-    start: 'Apr 2026',
-    end: 'Jul 2026',
-    bullets: [
-      'Scoped an AI automation workflow to generate UAT test steps for new features, identifying integration requirements and institutional blockers',
-      'Wrote and executed SQL queries to extract and validate test data, supporting defect investigation and QA reporting across production databases',
-      'Conducted functional testing and log-based debugging on production APIs, collaborating with engineering teams on root-cause analysis and resolution',
-    ],
-  },
-  {
-    title: 'YouthTechSG Open Impact Fellow',
-    organisation: 'Open Source Programme',
+    title: 'Open Impact Fellow, Security & Quality track',
+    organisation: 'Open Government Products Singapore × Mojaloop Foundation × YouthTechSG',
     start: 'May 2026',
     end: 'Present',
     bullets: [
-      'Selected for national open-source fellowship supported by IMDA, contributing to open-source projects with social impact focus',
+      'Selected for national open-source fellowship supported by Infocomm Media Development Authority (IMDA) Singapore, contributing to the Mojaloop Foundation, an open-source payments platform for financial inclusion',
+      'Won Key Contributor Award, MojaCom32 (Mojaloop Community), 2026',
+      'Fixed credential leak in Mojaloop’s shared logging plugin (central-services-shared): DELETE request streams were serialised into logs, exposing Bearer tokens in plaintext. Sanitised payload logging, added unit tests. Merged (PR #524)',
+      'Built QuantumTrace, post-quantum cryptography scanner for Mojaloop, as fellowship deliverable. Reviewed by Mojaloop maintainers',
+      'Merged 3 PRs across 3 Mojaloop repos (central-services-shared, account-lookup-service, database-lib), including non-breaking dependency upgrades verified against audit, lint and full test suite',
     ],
+    techStack: ['Python', 'JavaScript/TypeScript', 'Hapi', 'CircleCI', 'Grype', 'audit-ci', 'Git'],
   },
   {
     title: 'Product Lead',
@@ -108,10 +90,24 @@ export const experience: Role[] = [
     start: 'Sep 2025',
     end: 'Present',
     bullets: [
-      'Architecting and building Go-based payments backend integrating with EurexaX API for cross-border P2P currency exchange between SGD and MYR markets',
-      'Engineered production RBAC system with NextAuth v5, implementing secure API routes and granular access controls across three permission levels (user, admin, superadmin)',
-      'Led complete database migration from Firebase to MongoDB Atlas, designing scalable schemas and optimizing connection pooling for serverless deployment on Vercel',
-      'Built database-driven blog CMS with admin dashboard, supporting investor communications and user onboarding, integrating Cloudinary for asset management',
+      'Architecting Go-based payments backend integrating cross-border FX API for SGD↔MYR currency exchange',
+      'Built database-driven blog CMS with responsive Next.js frontend and admin dashboard for investor communications and user onboarding',
+      'Engineered production RBAC system (NextAuth v5) across three permission tiers with secure API routes',
+      'Led Firebase → MongoDB Atlas migration, designing scalable schemas and optimizing connection pooling for serverless deployment on Vercel',
+    ],
+    techStack: ['Go', 'Next.js 16', 'TypeScript', 'MongoDB Atlas', 'NextAuth v5', 'REST APIs', 'Vercel'],
+  },
+  {
+    title: 'QA Engineer Intern / Business Analyst Intern',
+    organisation: 'Temus',
+    orgNote: 'Temasek × US Tech JV',
+    start: 'Jan 2026',
+    end: 'Jul 2026',
+    bullets: [
+      'Built AI automation workflow that generates manual UAT test steps for new features, cutting test case drafting time 50% and improving consistency across releases',
+      'Wrote and ran SQL on production databases to extract and validate test data, supporting defect investigation and QA reporting',
+      'Functional testing and log-based debugging on production APIs; root-cause analysis with engineering teams',
+      'As BA: wrote user stories and acceptance criteria in Agile/Scrum squads; demoed progress to senior leadership',
     ],
   },
   {
@@ -128,30 +124,12 @@ export const experience: Role[] = [
 ];
 
 export const skills: SkillGroup[] = [
-  {
-    category: 'Programming Languages',
-    items: ['Go', 'SQL', 'JavaScript', 'TypeScript', 'Python', 'Java', 'C/C++'],
-  },
-  {
-    category: 'Technologies & Frameworks',
-    items: ['Next.js 16', 'Node.js', 'Express.js', 'React', 'REST APIs', 'NextAuth v5'],
-  },
-  {
-    category: 'Databases',
-    items: ['MongoDB Atlas', 'PostgreSQL', 'Supabase', 'Firebase'],
-  },
-  {
-    category: 'DevOps & Tools',
-    items: ['Vercel', 'Git', 'Docker', 'CI/CD pipelines', 'Jira'],
-  },
-  {
-    category: 'Security & Best Practices',
-    items: ['RBAC implementation', 'API security', 'Helmet.js', 'CORS', 'PDPA compliance'],
-  },
-  {
-    category: 'Data & Analytics',
-    items: ['Power BI', 'Jupyter Notebook', 'Database optimization', 'Connection pooling'],
-  },
+  { category: 'Languages', items: ['Go', 'TypeScript', 'JavaScript', 'Python', 'Java', 'SQL', 'C/C++'] },
+  { category: 'Frameworks', items: ['Next.js', 'React', 'Node.js', 'Express.js', 'REST APIs', 'NextAuth'] },
+  { category: 'Cloud & DevOps', items: ['AWS', 'Terraform', 'Docker', 'CI/CD', 'Git', 'Vercel'] },
+  { category: 'Data', items: ['PostgreSQL', 'Supabase', 'MongoDB Atlas', 'Firebase'] },
+  { category: 'AI', items: ['Anthropic API', 'OpenRouter', 'MCP (FastMCP)', 'agentic workflows'] },
+  { category: 'Security', items: ['RBAC', 'API security', 'PDPA compliance', 'post-quantum crypto analysis'] },
 ];
 
 export const activities: Activity[] = [
@@ -161,9 +139,7 @@ export const activities: Activity[] = [
     start: 'Aug 2024',
     end: 'Aug 2025',
     bullets: [
-      'Coached 20-member team from beginner to competitive level through structured training programs and weekly practice sessions',
-      'Led team to Round of 8 in Inter-Hall Recreational Games Championship with undefeated record',
-      'Developed comprehensive training curriculum and peer mentorship framework',
+      'Coached 20-member team to Round of 8, Inter-Hall Recreational Games Championship, undefeated record',
     ],
   },
   {
@@ -172,8 +148,7 @@ export const activities: Activity[] = [
     start: 'Aug 2024',
     end: 'Present',
     bullets: [
-      'Advancing cybersecurity expertise through professional seminars and hands-on applications (supported by CyberSG R&D Programme Office)',
-      'Participating in practical workshops covering threat analysis, penetration testing, and security protocols',
+      'Workshops on threat analysis, penetration testing, security protocols (CyberSG R&D Programme Office)',
     ],
   },
 ];
