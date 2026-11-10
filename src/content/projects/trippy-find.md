@@ -6,7 +6,7 @@ end: Jul 2025
 award: SummerBuild 2025 Gold Award
 context: SummerBuild 2025
 repo: darthrevan030/Trippy-Find-Summerbuild-2025
-order: 4
+order: 5
 showcase: true
 links:
   - label: GitHub

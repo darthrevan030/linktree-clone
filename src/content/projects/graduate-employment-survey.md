@@ -4,7 +4,7 @@ tagline: Interactive dashboard analysing Singapore graduate employment survey da
 start: "2025"
 context: Personal Project
 repo: darthrevan030/Graduate-Employment-Survey
-order: 9
+order: 10
 showcase: true
 links:
   - label: Live

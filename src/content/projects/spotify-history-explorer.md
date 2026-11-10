@@ -4,7 +4,7 @@ tagline: Privacy-first, fully client-side visualiser for Spotify extended stream
 start: "2025"
 context: Personal Project
 repo: darthrevan030/Spotify-Explorer
-order: 5
+order: 6
 showcase: true
 links:
   - label: Live

@@ -4,7 +4,7 @@ tagline: A Chrome theme extension that reached 2,540 peak weekly active users th
 start: Sep 2025
 context: Published on Chrome Web Store
 repo: darthrevan030/Not-Just-Black
-order: 3
+order: 4
 showcase: true
 links:
   - label: Chrome Web Store

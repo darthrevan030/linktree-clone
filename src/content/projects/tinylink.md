@@ -4,7 +4,7 @@ tagline: URL shortener with custom short links and per-link click analytics.
 start: "2025"
 context: Personal Project
 repo: darthrevan030/url-shortener
-order: 6
+order: 7
 showcase: true
 links:
   - label: GitHub

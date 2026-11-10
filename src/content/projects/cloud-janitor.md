@@ -6,7 +6,7 @@ end: Jul 2026
 award: AWS × Kiro BuildFest 2026 — Most Practical Award
 context: AWS × Kiro BuildFest 2026
 repo: darthrevan030/Cloud-Janitor
-order: 2
+order: 3
 showcase: true
 links:
   - label: GitHub

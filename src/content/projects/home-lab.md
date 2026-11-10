@@ -3,7 +3,7 @@ name: Home Lab
 tagline: Self-hosted NAS, network-wide DNS sinkhole, and container-level network isolation.
 start: Ongoing
 context: Ongoing
-order: 8
+order: 9
 showcase: true
 links: []
 tech:

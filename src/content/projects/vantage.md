@@ -5,7 +5,7 @@ start: May 2026
 end: Jun 2026
 context: SummerBuild 2026
 repo: darthrevan030/Vantage-Summerbuild-2026
-order: 1
+order: 2
 showcase: true
 links:
   - label: Live

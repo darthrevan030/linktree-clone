@@ -4,7 +4,7 @@ tagline: Java CLI managing internship placements across three user roles, built 
 start: Oct 2025
 context: SC2002, NTU
 repo: darthrevan030/TUI-Internship-Placement-Management-System
-order: 7
+order: 8
 showcase: true
 links:
   - label: GitHub
